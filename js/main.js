@@ -238,23 +238,55 @@
      MOTION
      ========================================================= */
   gsap.registerPlugin(ScrollTrigger);
-  ScrollTrigger.config({ ignoreMobileResize: true });
-  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  const touchInput = matchMedia('(hover: none) and (pointer: coarse)').matches;
+  root.classList.toggle('touch-motion', touchInput);
+  ScrollTrigger.config(touchInput
+    ? { autoRefreshEvents: 'none' }
+    : { ignoreMobileResize: true });
   const startHash = location.hash;
-  window.scrollTo(0, 0);
-  introPending = true;
+  if (!touchInput) {
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    window.scrollTo(0, 0);
+    introPending = true;
+    document.body.classList.add('is-loading');
+  }
 
-  if (window.Lenis) {
+  if (!touchInput && window.Lenis) {
     lenis = new Lenis({ lerp: 0.085, smoothWheel: true, wheelMultiplier: 1, touchMultiplier: 1.3 });
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add(t => lenis.raf(t * 1000));
     gsap.ticker.lagSmoothing(0);
   }
   syncScrollLock();
-  document.body.classList.add('is-loading');
 
   const vel = () => (lenis ? lenis.velocity || 0 : 0);
   const mm = gsap.matchMedia();
+  const touchScenes = new Map();
+  const heroStage = $('.hero-pin');
+  const setCompactLayout = () => root.classList.toggle('is-compact', heroStage.clientHeight <= 580);
+  if (touchInput) setCompactLayout();
+
+  function scrollScene(stage, end, scrub, mobileDistance) {
+    const section = stage.parentElement;
+    if (!touchInput) return { trigger: section, start: 'top top', end, pin: stage, scrub };
+
+    // Sticky mantém o palco na rolagem nativa. O espaço depois dele define a duração.
+    section.classList.add('scroll-scene');
+    stage.classList.add('scroll-stage');
+    let top = 0;
+    let distance = 0;
+    const measure = () => {
+      const height = heroStage.clientHeight;
+      top = Math.min(0, height - stage.offsetHeight);
+      distance = Math.max(1, Math.round(mobileDistance(height)));
+      stage.style.setProperty('--stage-top', `${top}px`);
+      section.style.setProperty('--scene-distance', `${distance}px`);
+    };
+    measure();
+    touchScenes.set(stage, measure);
+    ScrollTrigger.addEventListener('refreshInit', measure);
+    return { trigger: section, start: () => `top ${top}px`, end: () => `+=${distance}`, scrub: true };
+  }
 
   /* ---------- marquee infinito com velocidade do scroll ---------- */
   function marquee(track, dirBase, baseSpeed) {
@@ -337,23 +369,35 @@ void main() {
     imgB.fetchPriority = 'low';
     imgB.src = srcB;
     const canvas = document.createElement('canvas');
-    const gl = canvas.getContext('webgl', { antialias: false, premultipliedAlpha: false });
+    const gl = touchInput ? null : canvas.getContext('webgl', { antialias: false, premultipliedAlpha: false });
     let layer = canvas;
     let progress = 0;
+    let imageReady = false;
+    let lateFade;
     const fallback = () => {
+      if (layer === imgB) return;
       imgB.className = 'hero-morph';
       imgB.alt = '';
       imgB.setAttribute('aria-hidden', 'true');
       imgB.style.cssText = canvas.style.cssText;
-      imgB.style.opacity = String(progress);
+      imgB.style.opacity = '0';
       baseImg.style.visibility = '';
       if (canvas.parentNode) canvas.replaceWith(imgB);
       else media.insertBefore(imgB, baseImg.nextSibling);
       layer = imgB;
+      imgB.decode().then(() => {
+        imageReady = true;
+        imgB.style.opacity = String(progress);
+        if (touchInput && progress > 0) lateFade = imgB.animate({ opacity: [0, progress] }, { duration: 160, easing: 'ease-out' });
+      }).catch(() => {});
     };
     const fade = {
       el: imgB,
-      set(p) { imgB.style.opacity = String(p); },
+      set(p) {
+        if (p !== progress) lateFade?.cancel();
+        progress = p;
+        if (imageReady) imgB.style.opacity = String(p);
+      },
       size() {}
     };
     if (!gl) { fallback(); return fade; }
@@ -440,7 +484,7 @@ void main() {
      HERO — card que vira tela cheia no scroll
      ========================================================= */
   const hero = (() => {
-    const pin = $('.hero-pin');
+    const pin = heroStage;
     const media = $('.hero-media');
     const img = $('img', media);
     const frame = $('.hero-frame');
@@ -448,7 +492,7 @@ void main() {
     const slot = $('.hero-slot');
     const morph = createMorph(media, img, media.dataset.morph || 'img/steph-ilustracao.jpg');
     const M = { p: 0 };
-    const S = { intro: 0, zoom: 0, mx: 0, my: 0 };
+    const S = { intro: touchInput ? 1 : 0, zoom: 0, mx: 0, my: 0 };
     let R = { x: 0, y: 0, w: 1, h: 1 };
     let W = 1;
     let H = 1;
@@ -520,6 +564,7 @@ void main() {
       stick.style.height = `${(b - st).toFixed(1)}px`;
     }
 
+    pin.classList.add('is-ready');
     if (!img.complete) img.addEventListener('load', measure, { once: true });
     measure();
 
@@ -530,13 +575,12 @@ void main() {
     const fly = [[-0.45, -0.35, -40], [-0.6, 0.05, -25], [0.6, 0.12, 30], [-0.2, 0.5, -15], [0.5, -0.5, 60]];
     const tl = gsap.timeline({
       scrollTrigger: {
-        trigger: '.hero',
-        start: 'top top',
-        end: '+=240%',
-        pin: pin,
-        scrub: 0.7,
+        ...scrollScene(pin, '+=240%', 0.7, height => height * 1.65),
         invalidateOnRefresh: true,
-        onRefresh: measure
+        onRefresh: () => {
+          measure();
+          morph.set(M.p);
+        }
       }
     });
     tl.to(S, { zoom: 1, duration: 0.5, ease: 'power2.inOut', onUpdate: render }, 0)
@@ -545,15 +589,14 @@ void main() {
       .to('.hero-copy', { y: -70, opacity: 0, duration: 0.2, ease: 'power1.in' }, 0)
       .to('.hero-scroll', { opacity: 0, duration: 0.08 }, 0)
       .to(frame, { opacity: 0, duration: 0.14 }, 0.04)
-      // a foto vira a ilustração, bloco a bloco, enquanto termina de crescer
-      .to(M, { p: 1, duration: 0.5, ease: 'none', onUpdate: () => morph.set(M.p) }, 0)
+      .to(M, { p: 1, duration: touchInput ? 0.3 : 0.5, ease: 'none', onUpdate: () => morph.set(M.p) }, touchInput ? 0.18 : 0)
       .to('.hero-media-dots', { opacity: 0.22, duration: 0.2 }, 0.66)
       .to('.hero-media-shade', { opacity: 0.85, duration: 0.2 }, 0.7)
       .fromTo([...fA.chars, ...fB.chars], { yPercent: 120, rotation: i => ((i * 37) % 36) - 18, opacity: 0 }, { yPercent: 0, rotation: 0, opacity: 1, stagger: 0.014, duration: 0.24, ease: 'back.out(2)' }, 0.76)
       .to({}, { duration: 0.12 });
     stks.forEach((s, i) => {
       const f = fly[i] || [0, -0.5, 0];
-      tl.to(s, { x: () => f[0] * innerWidth, y: () => f[1] * innerHeight, rotation: f[2], opacity: 0, duration: 0.3, ease: 'power2.in' }, 0.01 * i);
+      tl.to(s, { x: () => f[0] * (touchInput ? W : innerWidth), y: () => f[1] * (touchInput ? H : innerHeight), rotation: f[2], opacity: 0, duration: 0.3, ease: 'power2.in' }, 0.01 * i);
     });
 
     // ponteiro: parallax suave
@@ -606,7 +649,7 @@ void main() {
     const { words } = split($('.mf-text'), 'words');
     gsap.set(words, { opacity: 0.12 });
     const tl = gsap.timeline({
-      scrollTrigger: { trigger: '.manifesto', start: 'top top', end: '+=130%', pin: '.mf-pin', scrub: 0.5 }
+      scrollTrigger: scrollScene($('.mf-pin'), '+=130%', 0.5, height => height * 0.85)
     });
     words.forEach((w, i) => {
       tl.to(w, { opacity: 1, duration: 0.5, ease: 'none' }, i * 0.18);
@@ -642,7 +685,7 @@ void main() {
       gsap.to(o, { n: v, duration: 1.6, ease: 'power3.out', onUpdate: () => { b.textContent = m[1] + o.n.toFixed(dec).replace('.', ',') + m[3]; } });
     };
     const tl = gsap.timeline({
-      scrollTrigger: { trigger: '.numbers', start: 'top top', end: '+=150%', pin: '.nb-pin', scrub: 0.6 }
+      scrollTrigger: scrollScene($('.nb-pin'), '+=150%', 0.6, height => height * 1.05)
     });
     tl.fromTo('.nb-num', { scale: 2.8 }, { scale: 1, duration: 0.5, ease: 'power3.out' }, 0)
       .to('.nb-num', { backgroundSize: '100% 100%', duration: 0.42, ease: 'none' }, 0.12)
@@ -656,7 +699,7 @@ void main() {
   })();
 
   /* =========================================================
-     QUADROS — scroll horizontal
+     QUADROS — gesto lateral no toque e scroll animado no desktop
      ========================================================= */
   (() => {
     const pinEl = $('.q-pin');
@@ -664,22 +707,37 @@ void main() {
     const cards = $$('.q-card');
     const count = $('.q-count');
     const bar = $('.q-bar i');
+    let active = 1;
+    const updateProgress = progress => {
+      bar.style.scale = `${progress} 1`;
+      const card = clamp(1, cards.length, Math.round(progress * (cards.length + 1)));
+      if (card === active) return;
+      active = card;
+      count.textContent = `${String(card).padStart(2, '0')} / ${String(cards.length).padStart(2, '0')}`;
+    };
+    gsap.from('.q-intro > *', { y: 50, opacity: 0, stagger: 0.08, duration: 1, ease: 'expo.out', scrollTrigger: { trigger: '.quadros', start: 'top 70%' } });
+    if (touchInput) {
+      const viewport = $('.q-viewport');
+      viewport.tabIndex = 0;
+      viewport.addEventListener('scroll', () => {
+        const range = Math.max(1, viewport.scrollWidth - viewport.clientWidth);
+        updateProgress(clamp(0, 1, viewport.scrollLeft / range));
+      }, { passive: true });
+      return;
+    }
+
     const dist = () => Math.max(0, track.scrollWidth - pinEl.clientWidth);
     const tween = gsap.to(track, {
       x: () => -dist(),
       ease: 'none',
       scrollTrigger: {
-        trigger: '.quadros',
+        trigger: pinEl.parentElement,
         start: 'top top',
         end: () => '+=' + dist(),
         pin: pinEl,
         scrub: 0.8,
         invalidateOnRefresh: true,
-        onUpdate: self => {
-          bar.style.scale = `${self.progress} 1`;
-          const n = clamp(1, cards.length, Math.round(self.progress * (cards.length + 1)));
-          count.textContent = `${String(n).padStart(2, '0')} / ${String(cards.length).padStart(2, '0')}`;
-        }
+        onUpdate: self => updateProgress(self.progress)
       }
     });
     cards.forEach(card => {
@@ -696,14 +754,13 @@ void main() {
       last = v;
       skew.forEach(f => f(v));
     });
-    gsap.from('.q-intro > *', { y: 50, opacity: 0, stagger: 0.08, duration: 1, ease: 'expo.out', scrollTrigger: { trigger: '.quadros', start: 'top 70%' } });
   })();
 
   /* =========================================================
      VÍDEOS
      ========================================================= */
   gsap.from('.reel figure', { yPercent: 28, rotationX: -38, opacity: 0, stagger: 0.09, duration: 1.3, ease: 'expo.out', scrollTrigger: { trigger: '.reel-grid', start: 'top 86%' } });
-  mm.add('(min-width: 768px)', () => {
+  if (!touchInput) mm.add('(min-width: 768px)', () => {
     const ys = [-50, 40, -90, 30, -60];
     $$('.reel').forEach((r, i) => gsap.fromTo(r, { y: -ys[i] * 0.6 }, { y: ys[i], ease: 'none', scrollTrigger: { trigger: '.reel-grid', start: 'top bottom', end: 'bottom top', scrub: true } }));
   });
@@ -711,8 +768,9 @@ void main() {
   /* =========================================================
      PODCAST — zoom no scroll
      ========================================================= */
-  gsap.fromTo('.pod-media', { scale: 0.74, rotation: -5 }, { scale: 1, rotation: 0, ease: 'none', scrollTrigger: { trigger: '.pod-media', start: 'top 98%', end: 'center 55%', scrub: 0.6 } });
-  gsap.fromTo('.pod-media-in img', { scale: 1.4 }, { scale: 1, ease: 'none', scrollTrigger: { trigger: '.pod-media', start: 'top 98%', end: 'center 55%', scrub: 0.6 } });
+  const podcastScroll = { trigger: '.pod-media', start: 'top 98%', end: 'center 55%', scrub: touchInput || 0.6 };
+  gsap.fromTo('.pod-media', { scale: 0.74, rotation: -5 }, { scale: 1, rotation: 0, ease: 'none', scrollTrigger: { ...podcastScroll } });
+  gsap.fromTo('.pod-media-in img', { scale: 1.4 }, { scale: 1, ease: 'none', scrollTrigger: { ...podcastScroll } });
   gsap.from('.pod-ill', { scale: 0, rotation: -120, duration: 1.1, ease: 'back.out(1.8)', scrollTrigger: { trigger: '.pod-copy', start: 'top 82%' } });
   gsap.from('.pod-proof li', { y: 20, opacity: 0, stagger: 0.08, duration: 0.8, ease: 'expo.out', scrollTrigger: { trigger: '.pod-proof', start: 'top 92%' } });
 
@@ -726,7 +784,7 @@ void main() {
     rotation: i => [-11, 0, 11][i]
   }, {
     xPercent: 0, yPercent: 0, rotation: 0, ease: 'none',
-    scrollTrigger: { trigger: '.case-phones', start: 'top 95%', end: 'top 42%', scrub: 0.6 }
+    scrollTrigger: { trigger: '.case-phones', start: 'top 95%', end: 'top 42%', scrub: touchInput || 0.6 }
   });
   gsap.to('.seal svg', { rotation: 360, ease: 'none', scrollTrigger: { trigger: '.case', start: 'top bottom', end: 'bottom top', scrub: 0.5 } });
   gsap.from('.seal', { scale: 0, rotation: -90, duration: 1, ease: 'back.out(2)', scrollTrigger: { trigger: '.case', start: 'top 70%' } });
@@ -762,8 +820,8 @@ void main() {
     let current = -1;
 
     function layout() {
-      const vw = innerWidth;
-      const vh = innerHeight;
+      const vw = touchInput ? stage.clientWidth : innerWidth;
+      const vh = touchInput ? stage.clientHeight : innerHeight;
       const mobile = vw < 768;
       GAP = mobile ? 560 : 720;
       const SX = mobile ? vw * 0.2 : vw * 0.25;
@@ -828,11 +886,7 @@ void main() {
       ease: 'none',
       onUpdate: render,
       scrollTrigger: {
-        trigger: '.gallery',
-        start: 'top top',
-        end: () => '+=' + Math.round(N * innerHeight * 0.34),
-        pin: '.gl-pin',
-        scrub: 1,
+        ...scrollScene(stage.parentElement, () => '+=' + Math.round(N * innerHeight * 0.34), 1, height => N * height * 0.27),
         invalidateOnRefresh: true,
         onRefresh: layout
       }
@@ -894,7 +948,7 @@ void main() {
   ScrollTrigger.addEventListener('refresh', chapters);
 
   /* ---------- holográfico reage ao scroll ---------- */
-  gsap.to('.bg-holo', { yPercent: -18, ease: 'none', scrollTrigger: { trigger: 'main', start: 'top top', end: 'bottom bottom', scrub: 1 } });
+  gsap.to('.bg-holo', { yPercent: -18, ease: 'none', scrollTrigger: { trigger: 'main', start: 'top top', end: 'bottom bottom', scrub: touchInput || 1 } });
 
   /* ---------- nav, HUD e seção ativa ---------- */
   const nav = $('.nav');
@@ -904,12 +958,16 @@ void main() {
   const hudPct = $('.hud-pct');
   const navLinks = $$('.nav-links a[href^="#"]');
   let lastPercent = 0;
+  let lastY = scrollY;
   const onScroll = () => {
     const y = lenis ? lenis.scroll : scrollY;
     const max = lenis ? lenis.limit : document.documentElement.scrollHeight - innerHeight;
     const p = max > 0 ? clamp(0, 1, y / max) : 0;
-    const dir = lenis ? lenis.direction : 0;
-    nav.classList.toggle('is-hidden', dir === 1 && y > 320 && menu.hidden);
+    if (y !== lastY) {
+      const dir = lenis ? lenis.direction : Math.sign(y - lastY);
+      nav.classList.toggle('is-hidden', dir === 1 && y > 320 && menu.hidden);
+      lastY = y;
+    }
     hudBar.style.scale = `${p} 1`;
     const percent = Math.round(p * 100);
     if (percent !== lastPercent) {
@@ -999,6 +1057,45 @@ void main() {
           .add(resolve, '-=0.65');
       });
     });
+  }
+
+  if (touchInput) {
+    $('.loader')?.remove();
+    ScrollTrigger.refresh();
+    const target = document.getElementById(startHash.slice(1));
+    if (target && target !== heroStage.parentElement) target.scrollIntoView();
+
+    // O palco só muda com a área de layout, não quando a barra do navegador anima.
+    const sizeOf = el => `${el.clientWidth}×${el.clientHeight}`;
+    const layoutElements = [...touchScenes.keys(), $('#main')];
+    const sizes = new Map(layoutElements.map(el => [el, sizeOf(el)]));
+    let refreshFrame;
+    const refreshLayout = () => {
+      ScrollTrigger.removeEventListener('scrollEnd', refreshLayout);
+      if (sizes.get(heroStage) !== sizeOf(heroStage)) {
+        if (ScrollTrigger.isScrolling()) {
+          ScrollTrigger.addEventListener('scrollEnd', refreshLayout);
+          return;
+        }
+        setCompactLayout();
+        ScrollTrigger.refresh();
+      } else {
+        // Recalcula os limites sem o refresh global, que reposiciona a página.
+        touchScenes.forEach(measure => measure());
+        ScrollTrigger.getAll().forEach(trigger => trigger.refresh());
+        ScrollTrigger.update();
+        chapters();
+      }
+      layoutElements.forEach(el => sizes.set(el, sizeOf(el)));
+    };
+    const refreshOnResize = entries => {
+      if (!entries.some(({ target }) => sizes.get(target) !== sizeOf(target))) return;
+      cancelAnimationFrame(refreshFrame);
+      refreshFrame = requestAnimationFrame(refreshLayout);
+    };
+    const observer = new ResizeObserver(refreshOnResize);
+    layoutElements.forEach(el => observer.observe(el));
+    return;
   }
 
   runLoader().then(() => {
