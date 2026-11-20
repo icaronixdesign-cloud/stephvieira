@@ -15,6 +15,7 @@
   if (!MOTION) root.classList.remove('motion');
 
   let lenis = null;
+  let introPending = false;
   const clamp = (a, b, v) => Math.min(b, Math.max(a, v));
 
   /* ---------- split de texto (palavras / letras) ---------- */
@@ -133,37 +134,58 @@
   /* ---------- menu mobile ---------- */
   const burger = $('.nav-burger');
   const menu = $('#menu');
+  const lb = $('.lb');
+  const mobileNav = matchMedia('(max-width: 900px)');
+  const pageContent = [$('#main'), $('.foot')];
+
+  function syncScrollLock() {
+    const overlayOpen = !menu.hidden || lb?.open === true;
+    root.classList.toggle('has-overlay', overlayOpen);
+    if (lenis) {
+      if (overlayOpen || introPending) lenis.stop();
+      else lenis.start();
+    }
+  }
+
   function openMenu() {
     menu.hidden = false;
+    menu.scrollTop = 0;
     burger.setAttribute('aria-expanded', 'true');
-    if (lenis) lenis.stop();
-    if (MOTION) gsap.fromTo('#menu nav a', { yPercent: 70, opacity: 0, rotation: 4 }, { yPercent: 0, opacity: 1, rotation: 0, stagger: 0.05, duration: 0.7, ease: 'expo.out' });
+    pageContent.forEach(el => { el.inert = true; });
+    syncScrollLock();
+    $('nav a', menu).focus({ preventScroll: true });
+    if (MOTION) gsap.fromTo('#menu nav a', { yPercent: 70, opacity: 0, rotation: 4 }, { yPercent: 0, opacity: 1, rotation: 0, stagger: 0.05, duration: 0.7, ease: 'expo.out', overwrite: true });
   }
-  function closeMenu() {
+  function closeMenu(restoreFocus = false) {
     if (menu.hidden) return;
     menu.hidden = true;
     burger.setAttribute('aria-expanded', 'false');
-    if (lenis) lenis.start();
+    pageContent.forEach(el => { el.inert = false; });
+    syncScrollLock();
+    if (restoreFocus) burger.focus({ preventScroll: true });
   }
-  burger.addEventListener('click', () => (menu.hidden ? openMenu() : closeMenu()));
-  addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+  burger.addEventListener('click', () => (menu.hidden ? openMenu() : closeMenu(true)));
+  addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(true); });
+  mobileNav.addEventListener('change', e => { if (!e.matches) closeMenu(); });
 
   /* ---------- âncoras ---------- */
+  function scrollToSection(target, duration) {
+    if (lenis) lenis.scrollTo(target.id === 'top' ? 0 : target, { duration, force: introPending });
+    else target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
+  }
+
   $$('a[href^="#"]').forEach(a => {
     a.addEventListener('click', e => {
-      const id = a.getAttribute('href');
-      if (id.length < 2) return;
-      const t = $(id);
-      if (!t) return;
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const target = document.getElementById(a.hash.slice(1));
+      if (!target) return;
       e.preventDefault();
       closeMenu();
-      if (lenis) lenis.scrollTo(id === '#top' ? 0 : t, { duration: 1.8 });
-      else t.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
+      scrollToSection(target, 1.8);
     });
   });
 
   /* ---------- lightbox dos vídeos ---------- */
-  const lb = $('.lb');
   if (lb && typeof lb.showModal === 'function') {
     const vid = $('video', lb);
     const cap = $('.lb-cap', lb);
@@ -183,7 +205,7 @@
     };
     figs.forEach((f, i) => $('.phone-btn', f).addEventListener('click', () => {
       if (!lb.open) lb.showModal();
-      if (lenis) lenis.stop();
+      syncScrollLock();
       show(i);
     }));
     $('.lb-prev', lb).addEventListener('click', () => show(idx - 1));
@@ -191,10 +213,11 @@
     $('.lb-x', lb).addEventListener('click', () => lb.close());
     lb.addEventListener('click', e => { if (e.target === lb) lb.close(); });
     lb.addEventListener('close', () => {
+      if (lb.open) return;
       vid.pause();
       vid.removeAttribute('src');
       vid.load();
-      if (lenis) lenis.start();
+      syncScrollLock();
     });
   } else if (lb) {
     $$('.phone').forEach(f => $('.phone-btn', f).addEventListener('click', () => window.open(f.dataset.video, '_blank', 'noopener')));
@@ -219,14 +242,15 @@
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   const startHash = location.hash;
   window.scrollTo(0, 0);
+  introPending = true;
 
   if (window.Lenis) {
     lenis = new Lenis({ lerp: 0.085, smoothWheel: true, wheelMultiplier: 1, touchMultiplier: 1.3 });
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add(t => lenis.raf(t * 1000));
     gsap.ticker.lagSmoothing(0);
-    lenis.stop();
   }
+  syncScrollLock();
   document.body.classList.add('is-loading');
 
   const vel = () => (lenis ? lenis.velocity || 0 : 0);
@@ -257,7 +281,7 @@
       const v = vel();
       if (Math.abs(v) > 0.4) dir = Math.sign(v);
       const speed = baseSpeed * (1 + Math.min(Math.abs(v) * 0.32, 7));
-      x += dirBase * dir * speed * (dt / 1000);
+      x += dirBase * dir * speed * (Math.min(dt, 50) / 1000);
       if (x <= -half) x += half;
       if (x > 0) x -= half;
       track.style.transform = `translate3d(${x.toFixed(2)}px,0,0)`;
@@ -280,7 +304,7 @@ uniform float uP;
 float hash(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
 void main() {
   float p = uP;
-  float bell = sin(3.14159265 * p);
+  float bell = max(0.0, sin(3.14159265 * p));
   // mosaico: os pixels engrossam no meio da troca
   float cells = mix(900.0, 44.0, pow(bell, 0.8));
   vec2 uvM = (floor(vUv * cells) + 0.5) / cells;
@@ -310,17 +334,29 @@ void main() {
   function createMorph(media, baseImg, srcB) {
     const imgB = new Image();
     imgB.decoding = 'async';
+    imgB.fetchPriority = 'low';
     imgB.src = srcB;
     const canvas = document.createElement('canvas');
     const gl = canvas.getContext('webgl', { antialias: false, premultipliedAlpha: false });
+    let layer = canvas;
+    let progress = 0;
     const fallback = () => {
       imgB.className = 'hero-morph';
       imgB.alt = '';
       imgB.setAttribute('aria-hidden', 'true');
-      media.insertBefore(imgB, baseImg.nextSibling);
-      return { el: imgB, set(p) { imgB.style.opacity = String(p); }, size() {} };
+      imgB.style.cssText = canvas.style.cssText;
+      imgB.style.opacity = String(progress);
+      baseImg.style.visibility = '';
+      if (canvas.parentNode) canvas.replaceWith(imgB);
+      else media.insertBefore(imgB, baseImg.nextSibling);
+      layer = imgB;
     };
-    if (!gl) return fallback();
+    const fade = {
+      el: imgB,
+      set(p) { imgB.style.opacity = String(p); },
+      size() {}
+    };
+    if (!gl) { fallback(); return fade; }
     const sh = (type, src) => {
       const s = gl.createShader(type);
       gl.shaderSource(s, src);
@@ -329,12 +365,12 @@ void main() {
     };
     const vs = sh(gl.VERTEX_SHADER, 'attribute vec2 aP; varying vec2 vUv; void main(){ vUv = aP * 0.5 + 0.5; gl_Position = vec4(aP, 0.0, 1.0); }');
     const fs = sh(gl.FRAGMENT_SHADER, MORPH_FRAG);
-    if (!vs || !fs) return fallback();
+    if (!vs || !fs) { fallback(); return fade; }
     const prog = gl.createProgram();
     gl.attachShader(prog, vs);
     gl.attachShader(prog, fs);
     gl.linkProgram(prog);
-    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return fallback();
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { fallback(); return fade; }
     gl.useProgram(prog);
     const buf = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buf);
@@ -356,39 +392,45 @@ void main() {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, im);
     };
-    const state = { p: 0, ready: false };
+    let ready = false;
     const draw = () => {
-      if (!state.ready) return;
+      if (!ready || layer !== canvas) return;
       gl.viewport(0, 0, canvas.width, canvas.height);
-      gl.uniform1f(uP, state.p);
+      gl.uniform1f(uP, progress);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     };
     canvas.className = 'hero-morph';
     canvas.setAttribute('aria-hidden', 'true');
     media.insertBefore(canvas, baseImg.nextSibling);
-    const loaded = im => (im.complete && im.naturalWidth ? Promise.resolve() : new Promise(r => {
-      im.addEventListener('load', r, { once: true });
-      im.addEventListener('error', r, { once: true });
-    }));
-    Promise.all([loaded(baseImg), loaded(imgB)]).then(() => {
-      if (!baseImg.naturalWidth || !imgB.naturalWidth) return;
+    canvas.addEventListener('webglcontextlost', fallback, { once: true });
+    Promise.all([baseImg.decode(), imgB.decode()]).then(() => {
+      if (layer !== canvas || gl.isContextLost()) return;
       try {
         tex(0, baseImg);
         tex(1, imgB);
-      } catch (e) { return; }
-      state.ready = true;
+      } catch (e) { fallback(); return; }
+      if (gl.getError() !== gl.NO_ERROR) { fallback(); return; }
+      ready = true;
       draw();
       canvas.style.opacity = '1';
       baseImg.style.visibility = 'hidden';
-    });
+    }).catch(() => {});
     return {
-      el: canvas,
-      set(p) { state.p = p; draw(); },
+      get el() { return layer; },
+      set(p) {
+        if (p === progress) return;
+        progress = p;
+        if (layer === canvas) draw();
+        else fade.set(p);
+      },
       size(w, h) {
         const d = Math.min(window.devicePixelRatio || 1, 2);
         const k = Math.min(1, 2048 / Math.max(w * d, h * d, 1));
-        canvas.width = Math.max(2, Math.round(w * d * k));
-        canvas.height = Math.max(2, Math.round(h * d * k));
+        const width = Math.max(2, Math.round(w * d * k));
+        const height = Math.max(2, Math.round(h * d * k));
+        if (layer !== canvas || (width === canvas.width && height === canvas.height)) return;
+        canvas.width = width;
+        canvas.height = height;
         draw();
       }
     };
@@ -405,7 +447,6 @@ void main() {
     const stick = $('.hero-stickers');
     const slot = $('.hero-slot');
     const morph = createMorph(media, img, media.dataset.morph || 'img/steph-ilustracao.jpg');
-    const layers = [img, morph.el];
     const M = { p: 0 };
     const S = { intro: 0, zoom: 0, mx: 0, my: 0 };
     let R = { x: 0, y: 0, w: 1, h: 1 };
@@ -430,7 +471,7 @@ void main() {
       const fs = Math.max(W / nw, H / nh);
       const iw = nw * fs;
       const ih = nh * fs;
-      layers.forEach(el => {
+      [img, morph.el].forEach(el => {
         el.style.width = `${iw}px`;
         el.style.height = `${ih}px`;
         el.style.left = `${(W - iw) / 2}px`;
@@ -466,7 +507,8 @@ void main() {
       const dx = (cx - W / 2) * (1 - z);
       const dy = (cy - H / 2) * (1 - z);
       const tf = `translate3d(${dx.toFixed(1)}px,${dy.toFixed(1)}px,0) scale(${s.toFixed(4)})`;
-      layers.forEach(el => { el.style.transform = tf; });
+      img.style.transform = tf;
+      morph.el.style.transform = tf;
       // moldura (segue o recorte) e adesivos (seguem o card inteiro)
       frame.style.transform = `translate3d(${l.toFixed(1)}px,${t.toFixed(1)}px,0)`;
       frame.style.width = `${(r - l).toFixed(1)}px`;
@@ -480,7 +522,6 @@ void main() {
 
     if (!img.complete) img.addEventListener('load', measure, { once: true });
     measure();
-    addEventListener('resize', measure);
 
     // scroll: zoom até tela cheia
     const hn1 = $('.hn-1');
@@ -550,7 +591,7 @@ void main() {
       return it;
     }
 
-    return { intro, measure };
+    return { intro };
   })();
 
   /* ---------- faixas ---------- */
@@ -739,31 +780,37 @@ void main() {
         s._z = -s.rz * (N + 1) * GAP;
         s.el.style.transform = `translate3d(${(s.rx * vw * 0.55).toFixed(1)}px,${(s.ry * vh * 0.48).toFixed(1)}px,${s._z.toFixed(1)}px)`;
       });
-      total = (N + 0.7) * GAP;
       render();
     }
 
     const fade = z => clamp(0, 1, (z + 4.3 * GAP) / (1.3 * GAP)) * (1 - clamp(0, 1, (z - 120) / 520));
+    const opacityCache = new WeakMap();
+    const setOpacity = (el, opacity) => {
+      const value = Math.round(opacity * 1000);
+      if (opacityCache.get(el) === value) return;
+      opacityCache.set(el, value);
+      el.style.opacity = String(value / 1000);
+      el.style.visibility = value < 10 ? 'hidden' : 'visible';
+    };
+
+    function renderCamera() {
+      const cam = (P.p * total).toFixed(1);
+      world.style.transform = `rotateX(${look.ry.toFixed(2)}deg) rotateY(${look.rx.toFixed(2)}deg) translate3d(0,0,${cam}px)`;
+    }
 
     function render() {
+      renderCamera();
       const cam = P.p * total;
-      world.style.transform = `rotateX(${look.ry.toFixed(2)}deg) rotateY(${look.rx.toFixed(2)}deg) translate3d(0,0,${cam.toFixed(1)}px)`;
       let best = 1e9;
       let near = 0;
       const gate = clamp(0, 1, (P.p * N - 0.12) / 0.6);
       items.forEach((it, i) => {
         const z = it._z + cam;
-        const o = fade(z) * gate;
-        it.style.opacity = o.toFixed(3);
-        it.style.visibility = o < 0.01 ? 'hidden' : 'visible';
+        setOpacity(it, fade(z) * gate);
         const d = Math.abs(z - 160);
         if (d < best) { best = d; near = i; }
       });
-      sparks.forEach(s => {
-        const o = fade(s._z + cam);
-        s.el.style.opacity = o.toFixed(3);
-        s.el.style.visibility = o < 0.01 ? 'hidden' : 'visible';
-      });
+      sparks.forEach(s => setOpacity(s.el, fade(s._z + cam)));
       const hp = clamp(0, 1, (P.p * N) / 1.1);
       head.style.opacity = (1 - hp).toFixed(3);
       head.style.transform = `scale(${(1 + hp * 1.6).toFixed(3)})`;
@@ -792,8 +839,8 @@ void main() {
     });
     // leve inclinação da câmera com o ponteiro
     if (fine) {
-      const rx = gsap.quickTo(look, 'rx', { duration: 1.2, ease: 'power3', onUpdate: render });
-      const ry = gsap.quickTo(look, 'ry', { duration: 1.2, ease: 'power3', onUpdate: render });
+      const rx = gsap.quickTo(look, 'rx', { duration: 1.2, ease: 'power3', onUpdate: renderCamera });
+      const ry = gsap.quickTo(look, 'ry', { duration: 1.2, ease: 'power3', onUpdate: renderCamera });
       stage.parentElement.addEventListener('pointermove', e => {
         rx((e.clientX / innerWidth - 0.5) * 7);
         ry((e.clientY / innerHeight - 0.5) * -5);
@@ -856,6 +903,7 @@ void main() {
   const hudBar = $('.hud-bar i');
   const hudPct = $('.hud-pct');
   const navLinks = $$('.nav-links a[href^="#"]');
+  let lastPercent = 0;
   const onScroll = () => {
     const y = lenis ? lenis.scroll : scrollY;
     const max = lenis ? lenis.limit : document.documentElement.scrollHeight - innerHeight;
@@ -863,7 +911,11 @@ void main() {
     const dir = lenis ? lenis.direction : 0;
     nav.classList.toggle('is-hidden', dir === 1 && y > 320 && menu.hidden);
     hudBar.style.scale = `${p} 1`;
-    hudPct.textContent = `${String(Math.round(p * 100)).padStart(3, '0')}%`;
+    const percent = Math.round(p * 100);
+    if (percent !== lastPercent) {
+      hudPct.textContent = `${String(percent).padStart(3, '0')}%`;
+      lastPercent = percent;
+    }
     chapters();
   };
   if (lenis) lenis.on('scroll', onScroll);
@@ -931,7 +983,11 @@ void main() {
         heroImg.addEventListener('error', r, { once: true });
       });
       const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
-      const ready = Promise.race([Promise.all([imgReady, fontsReady]), new Promise(r => setTimeout(r, 3800))]);
+      let timeout;
+      const ready = Promise.race([
+        Promise.all([imgReady, fontsReady]),
+        new Promise(r => { timeout = setTimeout(r, 2500); })
+      ]).finally(() => clearTimeout(timeout));
       const tl = gsap.timeline();
       tl.to(lines, { opacity: 1, duration: 0.01, stagger: 0.32 })
         .to(o, { v: 82, duration: 1.2, ease: 'power2.inOut', onUpdate: setV }, 0);
@@ -948,17 +1004,13 @@ void main() {
   runLoader().then(() => {
     document.body.classList.remove('is-loading');
     ScrollTrigger.refresh();
-    hero.measure();
     const it = hero.intro();
-    let started = false;
     const go = () => {
-      if (started) return;
-      started = true;
-      if (lenis) lenis.start();
-      if (startHash && startHash.length > 1 && startHash !== '#top') {
-        const t = $(startHash);
-        if (t && lenis) lenis.scrollTo(t, { duration: 1.6 });
-      }
+      if (!introPending) return;
+      introPending = false;
+      syncScrollLock();
+      const target = document.getElementById(startHash.slice(1));
+      if (target && startHash !== '#top' && !root.classList.contains('has-overlay')) scrollToSection(target, 1.6);
     };
     it.eventCallback('onComplete', go);
     setTimeout(go, 2200);

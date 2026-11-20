@@ -14,11 +14,12 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23ff4fa3'/%3E%3Cpath d='M32 9c2 15 8 21 23 23-15 2-21 8-23 23-2-15-8-21-23-23 15-2 21-8 23-23z' fill='%23ffd24a' stroke='%2316152b' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E">
 <script>if(!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('motion')</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Lilita+One&family=VT323&display=swap" rel="stylesheet">
-<link rel="preload" as="image" href="img/h6.jpg">
+<link rel="preload" as="image" href="img/h6.jpg" fetchpriority="high">
 <link rel="stylesheet" href="css/style.css">
+<script defer src="js/vendor/gsap-3.12.5.min.js"></script>
+<script defer src="js/vendor/ScrollTrigger-3.12.5.min.js"></script>
+<script defer src="js/vendor/lenis-1.1.13.min.js"></script>
+<script defer src="js/main.js"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"Steph Vieira","alternateName":["Stephanie Vieira","steph vieira","vieira_steph"],"url":"https://stephvieira.com.br/","image":"https://stephvieira.com.br/img/h6.jpg","description":"Criadora de conteúdo e streamer brasileira: games, League of Legends, Brawl Stars, desenhos animados e cultura da internet. Sua amiga cronicamente online.","jobTitle":"Criadora de conteúdo e streamer","nationality":"Brasileira","email":"mailto:steph@acesquad.com.br","affiliation":{"@type":"Organization","name":"ACE Squad","email":"steph@acesquad.com.br"},"sameAs":["https://www.instagram.com/vieira_steph/","https://www.tiktok.com/@steph_vieira","https://www.youtube.com/c/StephVieira/","https://www.twitch.tv/steph","https://twitter.com/steph_vieira"]}</script>
 </head>
 <body>
@@ -68,7 +69,7 @@
   <button class="nav-burger" type="button" aria-expanded="false" aria-controls="menu"><span></span><span></span><b class="sr">abrir menu</b></button>
 </header>
 
-<div class="menu" id="menu" hidden>
+<div class="menu" id="menu" data-lenis-prevent hidden>
   <nav aria-label="menu">
     <a href="#quem">quem é</a>
     <a href="#quadros">quadros</a>
@@ -148,7 +149,7 @@
     <div class="wrap about-grid">
       <div class="about-visual">
         <figure class="about-photo">
-          <img src="img/h7.jpg" alt="Ilustração da Steph piscando, segurando o celular e fazendo sinal de paz" width="1000" height="1000" loading="lazy">
+          <img src="img/h7.jpg" alt="Ilustração da Steph piscando, segurando o celular e fazendo sinal de paz" width="1000" height="1000" loading="lazy" decoding="async">
         </figure>
         <ul class="about-tags">
           <li class="tag t1" data-speed="0.6"><span class="sticker sticker-sun">viciada em desenhos da cartoon network</span></li>
@@ -207,7 +208,7 @@
             <header class="win-bar"><span>hot_take.exe</span><span class="win-btns"><i></i><i></i><i></i></span></header>
             <div class="q-body">
               <div class="q-top">
-                <figure class="q-thumb"><img src="img/q_hottake.jpg" alt="Capa do Hot Take do Dia #01" width="180" height="239" loading="lazy"></figure>
+                <figure class="q-thumb"><img src="img/q_hottake.jpg" alt="Capa do Hot Take do Dia #01" width="180" height="239" loading="lazy" decoding="async"></figure>
                 <div><span class="q-num">01</span><h3>Hot Take do Dia</h3></div>
               </div>
               <p class="q-desc">uma opinião forte sobre a vida, explicada com exemplo do cotidiano e referências de jogos e cultura pop.</p>
@@ -220,7 +221,7 @@
             <header class="win-bar"><span>lore_de_boteco.exe</span><span class="win-btns"><i></i><i></i><i></i></span></header>
             <div class="q-body">
               <div class="q-top">
-                <figure class="q-thumb"><img src="media/q_lore_hd.jpg" alt="Capa do Lore de Boteco" width="540" height="960" loading="lazy"></figure>
+                <figure class="q-thumb"><img src="media/q_lore_hd.jpg" alt="Capa do Lore de Boteco" width="540" height="960" loading="lazy" decoding="async"></figure>
                 <div><span class="q-num">02</span><h3>Lore de Boteco</h3></div>
               </div>
               <p class="q-desc">a lore de league of legends contada como fofoca de mesa de bar.</p>
@@ -233,7 +234,7 @@
             <header class="win-bar"><span>brawler_apelao.exe</span><span class="win-btns"><i></i><i></i><i></i></span></header>
             <div class="q-body">
               <div class="q-top">
-                <figure class="q-thumb"><img src="img/q_brawl.jpg" alt="Capa do Brawler Mais Apelão com a Shelly" width="179" height="239" loading="lazy"></figure>
+                <figure class="q-thumb"><img src="img/q_brawl.jpg" alt="Capa do Brawler Mais Apelão com a Shelly" width="179" height="239" loading="lazy" decoding="async"></figure>
                 <div><span class="q-num">03</span><h3>Brawler Mais Apelão</h3></div>
               </div>
               <p class="q-desc">uma investigação, episódio por episódio, pra descobrir o brawler mais roubado do brawl stars.</p>
@@ -246,7 +247,7 @@
             <header class="win-bar"><span>desenhos.exe</span><span class="win-btns"><i></i><i></i><i></i></span></header>
             <div class="q-body">
               <div class="q-top">
-                <figure class="q-thumb"><img src="img/q_steven.jpg" alt="Capa do vídeo sobre Steven Universo" width="179" height="239" loading="lazy"></figure>
+                <figure class="q-thumb"><img src="img/q_steven.jpg" alt="Capa do vídeo sobre Steven Universo" width="179" height="239" loading="lazy" decoding="async"></figure>
                 <div><span class="q-num">04</span><h3>Desenhos &amp; Cultura Pop</h3></div>
               </div>
               <p class="q-desc">vilões, personagens e desenhos que marcaram a gente, com o olhar dela de hoje.</p>
@@ -259,7 +260,7 @@
             <header class="win-bar"><span>so_quem_jogou.exe</span><span class="win-btns"><i></i><i></i><i></i></span></header>
             <div class="q-body">
               <div class="q-top">
-                <figure class="q-thumb"><img src="img/q_termos.jpg" alt="Capa do vídeo sobre puffles do Club Penguin" width="179" height="239" loading="lazy"></figure>
+                <figure class="q-thumb"><img src="img/q_termos.jpg" alt="Capa do vídeo sobre puffles do Club Penguin" width="179" height="239" loading="lazy" decoding="async"></figure>
                 <div><span class="q-num">05</span><h3>Termos que Só Quem Jogou Entende</h3></div>
               </div>
               <p class="q-desc">club penguin, habbo, transformice, minecraft, the sims, need for speed. a internet que criou a gente.</p>
@@ -272,7 +273,7 @@
             <header class="win-bar"><span>side_quest.exe</span><span class="win-btns"><i></i><i></i><i></i></span></header>
             <div class="q-body">
               <div class="q-top">
-                <figure class="q-thumb"><img src="img/q_side.jpg" alt="Capa do Side Quest Vlog maquiando pra live" width="179" height="239" loading="lazy"></figure>
+                <figure class="q-thumb"><img src="img/q_side.jpg" alt="Capa do Side Quest Vlog maquiando pra live" width="179" height="239" loading="lazy" decoding="async"></figure>
                 <div><span class="q-num">06</span><h3>Side Quest Vlog</h3></div>
               </div>
               <p class="q-desc">a vida real fora da tela: rotina, cabelo, academia, pavê que dá errado.</p>
@@ -285,7 +286,7 @@
             <header class="win-bar"><span>o_que_x_diz.exe</span><span class="win-btns"><i></i><i></i><i></i></span></header>
             <div class="q-body">
               <div class="q-top">
-                <figure class="q-thumb"><img src="media/q_oquex_stardew.jpg" alt="Capa do O que X diz sobre você, edição Stardew Valley" width="540" height="960" loading="lazy"></figure>
+                <figure class="q-thumb"><img src="media/q_oquex_stardew.jpg" alt="Capa do O que X diz sobre você, edição Stardew Valley" width="540" height="960" loading="lazy" decoding="async"></figure>
                 <div><span class="q-num">07</span><h3>O que X diz sobre você</h3></div>
               </div>
               <p class="q-desc">brinca com as características de cada fandom e fala direto com o público. já teve pokémon, bloons td, stardew valley…</p>
@@ -298,7 +299,7 @@
             <header class="win-bar"><span>news.exe</span><span class="win-btns"><i></i><i></i><i></i></span></header>
             <div class="q-body">
               <div class="q-top">
-                <figure class="q-thumb"><img src="media/q_news_winx.jpg" alt="Capa do vídeo sobre o novo jogo das Winx" width="540" height="960" loading="lazy"></figure>
+                <figure class="q-thumb"><img src="media/q_news_winx.jpg" alt="Capa do vídeo sobre o novo jogo das Winx" width="540" height="960" loading="lazy" decoding="async"></figure>
                 <div><span class="q-num">08</span><h3>News</h3></div>
               </div>
               <p class="q-desc">as novidades de jogos que importam pro público dela, contadas com a linguagem dela.</p>
@@ -330,19 +331,19 @@
       </header>
       <div class="reel-grid">
         <a class="reel" href="https://www.instagram.com/p/Dax1K-1NQvq/" target="_blank" rel="noopener" data-cursor="▶ ver">
-          <figure><img src="media/r_shalixo.jpg" alt="Reel sobre o termo shalixo do Transformice" width="540" height="960" loading="lazy"><span class="views">580 mil views</span><figcaption>termos de transformice<small>termos que só quem jogou entende</small></figcaption></figure>
+          <figure><img src="media/r_shalixo.jpg" alt="Reel sobre o termo shalixo do Transformice" width="540" height="960" loading="lazy" decoding="async"><span class="views">580 mil views</span><figcaption>termos de transformice<small>termos que só quem jogou entende</small></figcaption></figure>
         </a>
         <a class="reel" href="https://www.instagram.com/p/DdZotdYB2eQ/" target="_blank" rel="noopener" data-cursor="▶ ver">
-          <figure><img src="img/ele.jpg" alt="Reel sobre o vilão Ele, das Meninas Superpoderosas" width="506" height="900" loading="lazy"><span class="views">64,8 mil views</span><figcaption>por que o Ele é o melhor vilão dos desenhos<small>desenhos &amp; cultura pop</small></figcaption></figure>
+          <figure><img src="img/ele.jpg" alt="Reel sobre o vilão Ele, das Meninas Superpoderosas" width="506" height="900" loading="lazy" decoding="async"><span class="views">64,8 mil views</span><figcaption>por que o Ele é o melhor vilão dos desenhos<small>desenhos &amp; cultura pop</small></figcaption></figure>
         </a>
         <a class="reel" href="https://www.instagram.com/p/Dc_f71xO8Eq/" target="_blank" rel="noopener" data-cursor="▶ ver">
-          <figure><img src="media/r_emz.jpg" alt="Brawler Mais Apelão episódio 4, Emz" width="540" height="960" loading="lazy"><span class="views">111 mil views</span><figcaption>brawler mais apelão: emz (ep. 4)<small>brawler mais apelão</small></figcaption></figure>
+          <figure><img src="media/r_emz.jpg" alt="Brawler Mais Apelão episódio 4, Emz" width="540" height="960" loading="lazy" decoding="async"><span class="views">111 mil views</span><figcaption>brawler mais apelão: emz (ep. 4)<small>brawler mais apelão</small></figcaption></figure>
         </a>
         <a class="reel" href="https://www.instagram.com/p/Ddt9DKdutPC/" target="_blank" rel="noopener" data-cursor="▶ ver">
-          <figure><img src="media/r_steven.jpg" alt="Reel sobre as fusões de Steven Universo" width="540" height="960" loading="lazy"><span class="views">41,3 mil views</span><figcaption>a beleza das fusões em steven universo<small>desenhos &amp; cultura pop</small></figcaption></figure>
+          <figure><img src="media/r_steven.jpg" alt="Reel sobre as fusões de Steven Universo" width="540" height="960" loading="lazy" decoding="async"><span class="views">41,3 mil views</span><figcaption>a beleza das fusões em steven universo<small>desenhos &amp; cultura pop</small></figcaption></figure>
         </a>
         <a class="reel" href="https://www.instagram.com/p/Dc9kPYluCLN/" target="_blank" rel="noopener" data-cursor="▶ ver">
-          <figure><img src="media/r_collab.jpg" alt="Confessionário versão gamer, collab da Steph com Medu Gomez" width="540" height="960" loading="lazy"><span class="views">177,7 mil views</span><figcaption>confessionário ver. gamer, feat. @medugomez<small>collabs</small></figcaption></figure>
+          <figure><img src="media/r_collab.jpg" alt="Confessionário versão gamer, collab da Steph com Medu Gomez" width="540" height="960" loading="lazy" decoding="async"><span class="views">177,7 mil views</span><figcaption>confessionário ver. gamer, feat. @medugomez<small>collabs</small></figcaption></figure>
         </a>
       </div>
     </div>
@@ -352,11 +353,11 @@
   <section class="podcast section" data-sec="06 · temporada nova">
     <div class="wrap pod-grid">
       <a class="pod-media" href="https://www.youtube.com/watch?v=jmwQiTnH4Ws" target="_blank" rel="noopener" data-cursor="▶ play">
-        <span class="pod-media-in"><img src="img/ep01.jpg" alt="Thumb do episódio 1 do podcast hot take do dia: Steph hoje ao lado da foto dela criança, com o texto 'não abandone quem você era'" width="1000" height="563" loading="lazy"></span>
+        <span class="pod-media-in"><img src="img/ep01.jpg" alt="Thumb do episódio 1 do podcast hot take do dia: Steph hoje ao lado da foto dela criança, com o texto 'não abandone quem você era'" width="1000" height="563" loading="lazy" decoding="async"></span>
         <span class="pod-stamp"><b>ep. 01 no ar</b>versão longa · youtube e spotify</span>
       </a>
       <div class="pod-copy">
-        <img class="pod-ill" src="img/m_hottake.jpg" alt="Ilustração da Steph no microfone com fundo de fogo" width="400" height="400" loading="lazy">
+        <img class="pod-ill" src="img/m_hottake.jpg" alt="Ilustração da Steph no microfone com fundo de fogo" width="400" height="400" loading="lazy" decoding="async">
         <p class="eyebrow">✦ o que vem por aí · temporada nova</p>
         <h2 class="h-lg">hot take: “be cringe. be free.”</h2>
         <p data-reveal>opiniões sobre vida, comportamento e internet, sempre com uma referência nerd no meio. o formato que nasceu nos reels ganhou versão longa no youtube e no spotify.</p>
@@ -395,15 +396,15 @@
         </div>
         <div class="case-phones">
           <figure class="phone" data-video="media/google_1.mp4">
-            <button class="phone-btn" type="button" data-cursor="▶ play" aria-label="tocar: vídeo 1 da campanha Google Modo IA"><img src="media/google_1.jpg" alt="" width="720" height="1280" loading="lazy"><span class="play">▶</span></button>
+            <button class="phone-btn" type="button" data-cursor="▶ play" aria-label="tocar: vídeo 1 da campanha Google Modo IA"><img src="media/google_1.jpg" alt="" width="720" height="1280" loading="lazy" decoding="async"><span class="play">▶</span></button>
             <figcaption><b>“hoje eu vou dormir cedo / eu também:”</b><small>a steph mostra uma situação em que a gente fica com dúvidas mega específicas.</small></figcaption>
           </figure>
           <figure class="phone" data-video="media/google_2.mp4">
-            <button class="phone-btn" type="button" data-cursor="▶ play" aria-label="tocar: vídeo 2 da campanha Google Modo IA"><img src="media/google_2.jpg" alt="" width="720" height="1280" loading="lazy"><span class="play">▶</span></button>
+            <button class="phone-btn" type="button" data-cursor="▶ play" aria-label="tocar: vídeo 2 da campanha Google Modo IA"><img src="media/google_2.jpg" alt="" width="720" height="1280" loading="lazy" decoding="async"><span class="play">▶</span></button>
             <figcaption><b>“ela não me responde, deve tá ocupada”</b><small>a steph mostra como é fácil usar a voz no modo IA do google, com perguntas bem-humoradas e específicas do nicho gamer.</small></figcaption>
           </figure>
           <figure class="phone" data-video="media/google_3.mp4">
-            <button class="phone-btn" type="button" data-cursor="▶ play" aria-label="tocar: vídeo 3 da campanha Google Modo IA"><img src="media/google_3.jpg" alt="" width="720" height="1280" loading="lazy"><span class="play">▶</span></button>
+            <button class="phone-btn" type="button" data-cursor="▶ play" aria-label="tocar: vídeo 3 da campanha Google Modo IA"><img src="media/google_3.jpg" alt="" width="720" height="1280" loading="lazy" decoding="async"><span class="play">▶</span></button>
             <figcaption><b>“pô, me chamaram pra uma mesa de rpg”</b><small>a steph mostra como criar um personagem pra jogar rpg com os amigos usando o modo IA do google.</small></figcaption>
           </figure>
         </div>
@@ -413,31 +414,31 @@
         <p class="brands-t">já trampei com <small>21 marcas</small></p>
         <div class="logo-row" data-dir="-1">
           <div class="logo-track">
-            <span class="lg"><img src="media/logos/google.png" alt="Google" loading="lazy"></span>
-            <span class="lg"><img src="media/logos/exitlag.png" alt="ExitLag" loading="lazy"></span>
-            <span class="lg"><img src="media/logos/fortnite.png" alt="Fortnite" loading="lazy"></span>
-            <span class="lg"><img src="media/logos/riot.png" alt="Riot Games" loading="lazy"></span>
-            <span class="lg"><img src="media/logos/dorflex.png" alt="Dorflex" loading="lazy"></span>
-            <span class="lg"><img src="media/logos/ilha.png" alt="Ilha das Lendas" loading="lazy"></span>
-            <span class="lg"><img src="media/logos/liquid.png" alt="Team Liquid" loading="lazy"></span>
-            <span class="lg"><img src="media/logos/kabum.png" alt="KaBuM!" loading="lazy"></span>
-            <span class="lg"><img src="media/logos/poe.png" alt="Path of Exile" loading="lazy"></span>
-            <span class="lg"><img src="media/logos/nuuvem.png" alt="Nuuvem" loading="lazy"></span>
-            <span class="lg"><img src="media/logos/ivs.png" alt="Invincible VS" loading="lazy"></span>
+            <span class="lg"><img src="media/logos/google.png" alt="Google" loading="lazy" decoding="async"></span>
+            <span class="lg"><img src="media/logos/exitlag.png" alt="ExitLag" loading="lazy" decoding="async"></span>
+            <span class="lg"><img src="media/logos/fortnite.png" alt="Fortnite" loading="lazy" decoding="async"></span>
+            <span class="lg"><img src="media/logos/riot.png" alt="Riot Games" loading="lazy" decoding="async"></span>
+            <span class="lg"><img src="media/logos/dorflex.png" alt="Dorflex" loading="lazy" decoding="async"></span>
+            <span class="lg"><img src="media/logos/ilha.png" alt="Ilha das Lendas" loading="lazy" decoding="async"></span>
+            <span class="lg"><img src="media/logos/liquid.png" alt="Team Liquid" loading="lazy" decoding="async"></span>
+            <span class="lg"><img src="media/logos/kabum.png" alt="KaBuM!" loading="lazy" decoding="async"></span>
+            <span class="lg"><img src="media/logos/poe.png" alt="Path of Exile" loading="lazy" decoding="async"></span>
+            <span class="lg"><img src="media/logos/nuuvem.png" alt="Nuuvem" loading="lazy" decoding="async"></span>
+            <span class="lg"><img src="media/logos/ivs.png" alt="Invincible VS" loading="lazy" decoding="async"></span>
           </div>
         </div>
         <div class="logo-row" data-dir="1">
           <div class="logo-track">
-            <span class="lg"><img src="media/logos/hok.png" alt="Honor of Kings" loading="lazy"></span>
-            <span class="lg"><img src="media/logos/natura.png" alt="Natura" loading="lazy"></span>
-            <span class="lg"><img src="media/logos/redbull.png" alt="Red Bull" loading="lazy"></span>
-            <span class="lg"><img src="media/logos/logitech.png" alt="Logitech" loading="lazy"></span>
-            <span class="lg"><img src="media/logos/eafc.png" alt="EA Sports FC 25" loading="lazy"></span>
-            <span class="lg"><img src="media/logos/kitkat.png" alt="KitKat" loading="lazy"></span>
-            <span class="lg"><img src="media/logos/dolcegusto.png" alt="Nescafé Dolce Gusto" loading="lazy"></span>
-            <span class="lg"><img src="media/logos/b3.png" alt="B3" loading="lazy"></span>
-            <span class="lg"><img src="media/logos/99pay.png" alt="99Pay" loading="lazy"></span>
-            <span class="lg"><img src="media/logos/ebac.png" alt="EBAC - Escola Britânica de Artes Criativas" loading="lazy"></span>
+            <span class="lg"><img src="media/logos/hok.png" alt="Honor of Kings" loading="lazy" decoding="async"></span>
+            <span class="lg"><img src="media/logos/natura.png" alt="Natura" loading="lazy" decoding="async"></span>
+            <span class="lg"><img src="media/logos/redbull.png" alt="Red Bull" loading="lazy" decoding="async"></span>
+            <span class="lg"><img src="media/logos/logitech.png" alt="Logitech" loading="lazy" decoding="async"></span>
+            <span class="lg"><img src="media/logos/eafc.png" alt="EA Sports FC 25" loading="lazy" decoding="async"></span>
+            <span class="lg"><img src="media/logos/kitkat.png" alt="KitKat" loading="lazy" decoding="async"></span>
+            <span class="lg"><img src="media/logos/dolcegusto.png" alt="Nescafé Dolce Gusto" loading="lazy" decoding="async"></span>
+            <span class="lg"><img src="media/logos/b3.png" alt="B3" loading="lazy" decoding="async"></span>
+            <span class="lg"><img src="media/logos/99pay.png" alt="99Pay" loading="lazy" decoding="async"></span>
+            <span class="lg"><img src="media/logos/ebac.png" alt="EBAC - Escola Britânica de Artes Criativas" loading="lazy" decoding="async"></span>
           </div>
         </div>
       </div>
@@ -462,25 +463,25 @@
       </div>
       <div class="gl-stage">
         <div class="gl-world">
-          <figure class="gl-item"><img src="img/g_rito.jpg" alt="Steph posando ao lado da placa da Riot Games, editada pra dizer Rito Games" width="750" height="1000" loading="lazy"><figcaption>visitando a riot (ou rito games)</figcaption></figure>
-          <figure class="gl-item"><img src="img/g_cabine.jpg" alt="Steph e uma amiga na cabine de transmissão, de headset" width="576" height="720" loading="lazy"><figcaption>na cabine de transmissão</figcaption></figure>
-          <figure class="gl-item"><img src="img/g_arcane.jpg" alt="Steph de terno vinho no painel de Arcane" width="576" height="720" loading="lazy"><figcaption>evento de arcane</figcaption></figure>
-          <figure class="gl-item"><img src="img/g_torcida.jpg" alt="Steph de microfone na mão no meio da torcida de um campeonato" width="540" height="720" loading="lazy"><figcaption>de microfone no meio da torcida</figcaption></figure>
-          <figure class="gl-item"><img src="img/g_arcade.jpg" alt="Steph no fliperama de 2XKO" width="540" height="720" loading="lazy"><figcaption>jogando 2xko no arcade</figcaption></figure>
-          <figure class="gl-item"><img src="img/g_estande.jpg" alt="Steph de repórter, com microfone, gravando na Runeterra Fanfest" width="541" height="720" loading="lazy"><figcaption>steph repórter resenhuda pra runeterra fanfest</figcaption></figure>
-          <figure class="gl-item"><img src="img/g_riot.jpg" alt="Steph com Sev7n e Dobz em frente a uma estátua do Tibbers" width="576" height="720" loading="lazy"><figcaption>com sev7n e dobz</figcaption></figure>
-          <figure class="gl-item"><img src="img/g_kabum.jpg" alt="Steph de headset branco no estúdio do KaBuM!" width="540" height="720" loading="lazy"><figcaption>no estúdio do kabum!</figcaption></figure>
-          <figure class="gl-item"><img src="img/g_twitch.jpg" alt="Retrato da Steph no painel da Twitch na Gamescom" width="540" height="720" loading="lazy"><figcaption>twitch na gamescom</figcaption></figure>
-          <figure class="gl-item"><img src="img/g_palco.jpg" alt="Steph andando no palco do CBLOL" width="576" height="720" loading="lazy"><figcaption>no palco do cblol</figcaption></figure>
-          <figure class="gl-item"><img src="img/g_sakura.jpg" alt="Steph embaixo de uma árvore de flores rosas numa ativação" width="541" height="720" loading="lazy"><figcaption>KengaZ em ionia!</figcaption></figure>
-          <figure class="gl-item"><img src="img/g_yordle.jpg" alt="Steph gritando ao lado de uma estátua de yordle" width="540" height="720" loading="lazy"><figcaption>fazendo amizade com um yordle na riot, em L.A.</figcaption></figure>
-          <figure class="gl-item"><img src="media/g_ilha.jpg" alt="Steph na pré-estreia de A Ilha Esquecida" width="540" height="720" loading="lazy"><figcaption>pré-estreia de “a ilha esquecida”, a convite da universal pictures</figcaption></figure>
-          <figure class="gl-item"><img src="media/g_google.jpg" alt="Steph de crachá no escritório do Google" width="540" height="720" loading="lazy"><figcaption>no google, num workshop sobre youtube</figcaption></figure>
-          <figure class="gl-item"><img src="media/gal_new3.jpg" alt="Steph no summit de Arcane na Riot, em Los Angeles" width="540" height="720" loading="lazy"><figcaption>uma das primeiras a ver as novidades de arcane, no summit em L.A.</figcaption></figure>
-          <figure class="gl-item"><img src="media/gal_new4.jpg" alt="Steph e as KengaZ na CCXP 25 com um cosplayer" width="540" height="720" loading="lazy"><figcaption>KengaZ na ccxp 25</figcaption></figure>
-          <figure class="gl-item"><img src="media/gal_new1.jpg" alt="Steph na Runeterra Fanfest" width="540" height="720" loading="lazy"><figcaption>runeterra fanfest</figcaption></figure>
-          <figure class="gl-item"><img src="media/gal_new2.jpg" alt="Steph fazendo live no setup da Team Liquid" width="540" height="720" loading="lazy"><figcaption>live da steph direto da team liquid</figcaption></figure>
-          <figure class="gl-item gl-ill"><img src="img/m_oculos.png" alt="Ilustração da Steph de óculos fazendo pose" width="219" height="420" loading="lazy"><figcaption>e às vezes em desenho</figcaption></figure>
+          <figure class="gl-item"><img src="img/g_rito.jpg" alt="Steph posando ao lado da placa da Riot Games, editada pra dizer Rito Games" width="750" height="1000" loading="lazy" decoding="async"><figcaption>visitando a riot (ou rito games)</figcaption></figure>
+          <figure class="gl-item"><img src="img/g_cabine.jpg" alt="Steph e uma amiga na cabine de transmissão, de headset" width="576" height="720" loading="lazy" decoding="async"><figcaption>na cabine de transmissão</figcaption></figure>
+          <figure class="gl-item"><img src="img/g_arcane.jpg" alt="Steph de terno vinho no painel de Arcane" width="576" height="720" loading="lazy" decoding="async"><figcaption>evento de arcane</figcaption></figure>
+          <figure class="gl-item"><img src="img/g_torcida.jpg" alt="Steph de microfone na mão no meio da torcida de um campeonato" width="540" height="720" loading="lazy" decoding="async"><figcaption>de microfone no meio da torcida</figcaption></figure>
+          <figure class="gl-item"><img src="img/g_arcade.jpg" alt="Steph no fliperama de 2XKO" width="540" height="720" loading="lazy" decoding="async"><figcaption>jogando 2xko no arcade</figcaption></figure>
+          <figure class="gl-item"><img src="img/g_estande.jpg" alt="Steph de repórter, com microfone, gravando na Runeterra Fanfest" width="541" height="720" loading="lazy" decoding="async"><figcaption>steph repórter resenhuda pra runeterra fanfest</figcaption></figure>
+          <figure class="gl-item"><img src="img/g_riot.jpg" alt="Steph com Sev7n e Dobz em frente a uma estátua do Tibbers" width="576" height="720" loading="lazy" decoding="async"><figcaption>com sev7n e dobz</figcaption></figure>
+          <figure class="gl-item"><img src="img/g_kabum.jpg" alt="Steph de headset branco no estúdio do KaBuM!" width="540" height="720" loading="lazy" decoding="async"><figcaption>no estúdio do kabum!</figcaption></figure>
+          <figure class="gl-item"><img src="img/g_twitch.jpg" alt="Retrato da Steph no painel da Twitch na Gamescom" width="540" height="720" loading="lazy" decoding="async"><figcaption>twitch na gamescom</figcaption></figure>
+          <figure class="gl-item"><img src="img/g_palco.jpg" alt="Steph andando no palco do CBLOL" width="576" height="720" loading="lazy" decoding="async"><figcaption>no palco do cblol</figcaption></figure>
+          <figure class="gl-item"><img src="img/g_sakura.jpg" alt="Steph embaixo de uma árvore de flores rosas numa ativação" width="541" height="720" loading="lazy" decoding="async"><figcaption>KengaZ em ionia!</figcaption></figure>
+          <figure class="gl-item"><img src="img/g_yordle.jpg" alt="Steph gritando ao lado de uma estátua de yordle" width="540" height="720" loading="lazy" decoding="async"><figcaption>fazendo amizade com um yordle na riot, em L.A.</figcaption></figure>
+          <figure class="gl-item"><img src="media/g_ilha.jpg" alt="Steph na pré-estreia de A Ilha Esquecida" width="540" height="720" loading="lazy" decoding="async"><figcaption>pré-estreia de “a ilha esquecida”, a convite da universal pictures</figcaption></figure>
+          <figure class="gl-item"><img src="media/g_google.jpg" alt="Steph de crachá no escritório do Google" width="540" height="720" loading="lazy" decoding="async"><figcaption>no google, num workshop sobre youtube</figcaption></figure>
+          <figure class="gl-item"><img src="media/gal_new3.jpg" alt="Steph no summit de Arcane na Riot, em Los Angeles" width="540" height="720" loading="lazy" decoding="async"><figcaption>uma das primeiras a ver as novidades de arcane, no summit em L.A.</figcaption></figure>
+          <figure class="gl-item"><img src="media/gal_new4.jpg" alt="Steph e as KengaZ na CCXP 25 com um cosplayer" width="540" height="720" loading="lazy" decoding="async"><figcaption>KengaZ na ccxp 25</figcaption></figure>
+          <figure class="gl-item"><img src="media/gal_new1.jpg" alt="Steph na Runeterra Fanfest" width="540" height="720" loading="lazy" decoding="async"><figcaption>runeterra fanfest</figcaption></figure>
+          <figure class="gl-item"><img src="media/gal_new2.jpg" alt="Steph fazendo live no setup da Team Liquid" width="540" height="720" loading="lazy" decoding="async"><figcaption>live da steph direto da team liquid</figcaption></figure>
+          <figure class="gl-item gl-ill"><img src="img/m_oculos.png" alt="Ilustração da Steph de óculos fazendo pose" width="219" height="420" loading="lazy" decoding="async"><figcaption>e às vezes em desenho</figcaption></figure>
         </div>
       </div>
       <div class="gl-count" aria-hidden="true"><b class="gl-i">01</b><span>/ 19</span><em class="gl-cap">visitando a riot (ou rito games)</em></div>
@@ -492,15 +493,15 @@
     <div class="wrap">
       <a class="shop-card" href="https://stephvieira.com.br/lojinha/" data-cursor="entrar">
         <div class="shop-copy">
-          <p class="eyebrow"><img src="lojinha/img/7fe30bad.png" alt="" width="128" height="128" loading="lazy"> // lojinha da steph</p>
+          <p class="eyebrow"><img src="lojinha/img/7fe30bad.png" alt="" width="128" height="128" loading="lazy" decoding="async"> // lojinha da steph</p>
           <h2 class="h-lg">coisas que eu uso e recomendo <span class="pk">✦</span></h2>
           <p>o que aparece no story e na live, tudo num lugar só. e tem cupom.</p>
           <span class="btn btn-sun">ver lojinha →</span>
         </div>
         <div class="shop-items">
-          <figure><img src="lojinha/img/9c561fb3.jpg" alt="LEGO Minecraft Creeper" width="440" height="440" loading="lazy"></figure>
-          <figure><img src="lojinha/img/e67118b7.jpg" alt="tinta azul turquesa" width="440" height="440" loading="lazy"></figure>
-          <figure><img src="lojinha/img/eb047464.jpg" alt="pegboard gamer Nexboard" width="440" height="440" loading="lazy"></figure>
+          <figure><img src="lojinha/img/9c561fb3.jpg" alt="LEGO Minecraft Creeper" width="440" height="440" loading="lazy" decoding="async"></figure>
+          <figure><img src="lojinha/img/e67118b7.jpg" alt="tinta azul turquesa" width="440" height="440" loading="lazy" decoding="async"></figure>
+          <figure><img src="lojinha/img/eb047464.jpg" alt="pegboard gamer Nexboard" width="440" height="440" loading="lazy" decoding="async"></figure>
           <span class="seal-sm" aria-hidden="true">steph<br>recomenda</span>
         </div>
       </a>
@@ -510,7 +511,7 @@
   <!-- ============ CONTATO ============ -->
   <section class="contact" id="contato" data-sec="10 · contato" data-sparkles>
     <div class="wrap ct-wrap">
-      <img class="ct-ill" src="media/m_pensando.png" alt="Ilustração da Steph pensando" width="184" height="420" loading="lazy">
+      <img class="ct-ill" src="media/m_pensando.png" alt="Ilustração da Steph pensando" width="184" height="420" loading="lazy" decoding="async">
       <p class="eyebrow">// contato comercial</p>
       <h2 class="ct-title split-chars">fala cmg! :)</h2>
       <p class="ct-lead">conta pra gente da sua marca que a gente te conta qual quadro combina com ela.</p>
@@ -519,7 +520,7 @@
         <button id="copy" class="btn btn-sun btn-sm" type="button">copiar e-mail</button>
         <a class="btn btn-sm" href="https://stephvieira.com.br/midiakit/">ver mídia kit →</a>
       </div>
-      <p class="ct-agency">agenciada por <img src="img/ace.png" alt="ACE Squad" width="340" height="110" loading="lazy"></p>
+      <p class="ct-agency">agenciada por <img src="img/ace.png" alt="ACE Squad" width="340" height="110" loading="lazy" decoding="async"></p>
       <ul class="ct-social">
         <li><a href="https://www.instagram.com/vieira_steph/" target="_blank" rel="noopener">instagram</a></li>
         <li><a href="https://www.tiktok.com/@steph_vieira" target="_blank" rel="noopener">tiktok</a></li>
@@ -540,7 +541,7 @@
   <p class="foot-giant" aria-hidden="true">steph vieira</p>
 </footer>
 
-<dialog class="lb" aria-label="vídeo da campanha">
+<dialog class="lb" aria-label="vídeo da campanha" data-lenis-prevent>
   <div class="lb-in">
     <video controls playsinline preload="none"></video>
     <div class="lb-meta">
@@ -553,9 +554,5 @@
 
 <div class="toast" role="status" aria-live="polite"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
-<script src="js/main.js"></script>
 </body>
 </html>
