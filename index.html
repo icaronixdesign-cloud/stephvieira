@@ -454,14 +454,103 @@
     </div>
   </section>
 
-  <!-- ============ GALERIA (túnel 3D) ============ -->
+  <!-- ============ GALERIA: fora de casa → KengaZ (de lado) → "e não para por aí" → túnel 3D ============
+       Com motion é um pin só (js/main.js, bloco GALERIA): o trilho anda pro lado até a capa das
+       KengaZ, sobe como um scroll comum (texto e botões do squad passam), a frase para no meio
+       e a câmera atravessa ela até as fotos. Sem motion tudo fica em coluna. -->
   <section class="gallery" id="galeria" data-sec="08 · galeria">
     <div class="gl-pin">
-      <div class="gl-head">
-        <p class="eyebrow">// fora de casa</p>
-        <h2 class="h-xl">steph trampante<br>por aí</h2>
-        <p>eventos, cabine de transmissão, estande, palco e algumas visitas que ela ainda não superou.</p>
+      <div class="gl-hs">
+        <div class="gl-hs-track">
+          <div class="gl-head">
+            <p class="eyebrow">// fora de casa</p>
+            <h2 class="h-xl">steph trampante<br>por aí</h2>
+            <p>eventos, cabine de transmissão, estande, palco e algumas visitas que ela ainda não superou.</p>
+          </div>
+
+          <!-- KengaZ: capa de revista (palavra gigante atrás do squad recortado, vídeos flutuando) -->
+          <article class="kz" id="kengaz" aria-labelledby="kz-title">
+            <div class="kz-cover">
+              <div class="kz-stage">
+                <span class="kz-glow" aria-hidden="true"></span>
+                <p class="eyebrow kz-eyebrow">// o squad</p>
+                <h3 class="kz-title" id="kz-title">
+                  <span class="sr">as KengaZ</span>
+                  <span class="kz-depth" data-depth="-0.55" aria-hidden="true">
+                    <span class="kz-lean">
+                      <span class="kz-kicker"><span class="kz-kicker-in">as</span></span>
+                      <span class="kz-word">
+                        <span class="kz-mask"><span class="kz-l">K</span></span><span class="kz-mask"><span class="kz-l">e</span></span><span class="kz-mask"><span class="kz-l">n</span></span><span class="kz-mask"><span class="kz-l">g</span></span><span class="kz-mask"><span class="kz-l">a</span></span><span class="kz-mask"><span class="kz-l kz-z">Z</span></span>
+                      </span>
+                    </span>
+                  </span>
+                </h3>
+                <div class="kz-squad">
+                  <div class="kz-depth" data-depth="0.2">
+                    <div class="kz-lean">
+                      <figure class="kz-squad-in">
+                        <img src="img/kengaz-squad.webp" srcset="img/kengaz-squad-960.webp 960w, img/kengaz-squad.webp 1440w" sizes="(max-aspect-ratio: 5/6) 130vw, (max-width: 640px) 130vw, 68vw" alt="A Steph e mais duas KengaZ juntas no painel da Twitch na Gamescom Latam, sorrindo pra câmera" width="1440" height="961" loading="lazy" decoding="async" draggable="false">
+                        <span class="kz-tag" aria-hidden="true">
+                          <span class="kz-tag-in sticker sticker-pink">a steph ✦</span>
+                          <svg class="kz-tag-arrow" viewBox="0 0 64 56"><g class="kz-tag-arrow-out"><path d="M58 6 C 40 4, 18 14, 10 44"/><path d="M3 34 L10 46 L21 38"/></g><g class="kz-tag-arrow-in"><path d="M58 6 C 40 4, 18 14, 10 44"/><path d="M3 34 L10 46 L21 38"/></g></svg>
+                        </span>
+                        <figcaption class="kz-credit">// no painel da twitch, gamescom latam</figcaption>
+                      </figure>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="kz-vids">
+              <header class="kz-vids-head">
+                <p class="eyebrow">// youtube.com/@askengaz</p>
+                <h4>os mais recentes do canal</h4>
+              </header>
+              <ul class="kz-cards" aria-label="vídeos recentes das KengaZ">
+                <li class="kz-card kz-card--a" style="--accent:var(--sun)">
+                  <div class="kz-depth" data-depth="1.15"><div class="kz-lean"><div class="kz-float"><div class="kz-tilt">
+                    <a class="kz-card-link win" href="https://www.youtube.com/watch?v=zCLdcXlsupg" target="_blank" rel="noopener" data-cursor="▶ ver">
+                      <span class="win-bar" aria-hidden="true"><span>kda_voltou.mp4</span><span class="win-btns"><i></i><i></i><i></i></span></span>
+                      <span class="kz-card-body">
+                        <span class="kz-thumb"><img src="img/kz_v1.jpg" alt="" width="640" height="360" loading="lazy" decoding="async" draggable="false"><span class="play" aria-hidden="true">▶</span><span class="kz-new" aria-hidden="true">novo!</span></span>
+                        <span class="kz-card-txt"><span class="kz-card-t">O K/DA voltou! 💫 kengaZ reagem + testam as skins HEATBRINGER no Wild Rift 💜</span><time datetime="2026-11-19">19 nov 2026</time></span>
+                      </span>
+                    </a>
+                  </div></div></div></div>
+                </li>
+                <li class="kz-card kz-card--b" style="--accent:var(--mint)">
+                  <div class="kz-depth" data-depth="1.5"><div class="kz-lean"><div class="kz-float"><div class="kz-tilt">
+                    <a class="kz-card-link win" href="https://www.youtube.com/watch?v=9P0zj-eIRH0" target="_blank" rel="noopener" data-cursor="▶ ver">
+                      <span class="win-bar" aria-hidden="true"><span>pescaria_caos.mp4</span><span class="win-btns"><i></i><i></i><i></i></span></span>
+                      <span class="kz-card-body">
+                        <span class="kz-thumb"><img src="img/kz_v2.jpg" alt="" width="640" height="360" loading="lazy" decoding="async" draggable="false"><span class="play" aria-hidden="true">▶</span></span>
+                        <span class="kz-card-txt"><span class="kz-card-t">as KengaZ vão pescar (CAOS) 😭🔥🐟🎣</span><time datetime="2026-10-06">06 out 2026</time></span>
+                      </span>
+                    </a>
+                  </div></div></div></div>
+                </li>
+                <li class="kz-card kz-card--c" style="--accent:var(--lilac)">
+                  <div class="kz-depth" data-depth="0.85"><div class="kz-lean"><div class="kz-float"><div class="kz-tilt">
+                    <a class="kz-card-link win" href="https://www.youtube.com/watch?v=ofo_GhrJ_nU" target="_blank" rel="noopener" data-cursor="▶ ver">
+                      <span class="win-bar" aria-hidden="true"><span>crossover_lol.mp4</span><span class="win-btns"><i></i><i></i><i></i></span></span>
+                      <span class="kz-card-body">
+                        <span class="kz-thumb"><img src="img/kz_v3.jpg" alt="" width="640" height="360" loading="lazy" decoding="async" draggable="false"><span class="play" aria-hidden="true">▶</span></span>
+                        <span class="kz-card-txt"><span class="kz-card-t">as KengaZ jogam LoL feat. @Beamom | CROSSOVER INSANO 🔥</span><time datetime="2026-09-06">06 set 2026</time></span>
+                      </span>
+                    </a>
+                  </div></div></div></div>
+                </li>
+              </ul>
+            </div>
+          </article>
+
+          <div class="gl-next">
+            <p class="gl-next-t">e não para <span class="gl-next-hl">por aí<svg class="gl-next-squig" viewBox="0 0 240 24" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M4 14 C 24 2, 44 24, 64 12 S 104 2, 124 12 S 164 24, 184 12 S 224 2, 236 10"/></svg></span></p>
+          </div>
+        </div>
       </div>
+
       <div class="gl-stage">
         <div class="gl-world">
           <figure class="gl-item"><img src="img/g_rito.jpg" alt="Steph posando ao lado da placa da Riot Games, editada pra dizer Rito Games" width="750" height="1000" loading="lazy" decoding="async"><figcaption>visitando a riot (ou rito games)</figcaption></figure>

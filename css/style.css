@@ -503,6 +503,8 @@ p { text-wrap: pretty; }
    PUBLIS (capítulo noturno)
    ========================================================= */
 .publis { color: var(--paper); }
+/* sem motion o capítulo noturno (.bg-night, ligado pelo JS) não acende: o fundo vem daqui */
+html:not(.motion) .publis, html:not(.motion) .gallery { background: var(--ink) radial-gradient(circle at 1px 1px, rgba(255,255,255,.07) 1.2px, transparent 1.6px) 0 0 / 9px 9px; }
 .publis .eyebrow, .gallery .eyebrow { color: var(--mint); }
 .publis .sec-head > p { color: rgba(247,245,251,.78); }
 .case { position: relative; display: grid; grid-template-columns: 5fr 7fr; gap: clamp(32px, 5vw, 80px); align-items: center; padding: clamp(28px, 4.2vw, 64px); background: var(--ink-2); border: var(--bw) solid var(--paper); border-radius: 34px; box-shadow: 12px 12px 0 var(--pink); }
@@ -538,9 +540,9 @@ p { text-wrap: pretty; }
 .cases-cta div { display: flex; flex-wrap: wrap; gap: 14px; }
 
 /* =========================================================
-   GALERIA (túnel 3D)
+   GALERIA (fora de casa → KengaZ → "e não para por aí" → túnel 3D)
    ========================================================= */
-.gallery { color: var(--paper); }
+.gallery { --kz-h: max(100vh, 600px); --kz-h: max(100svh, 600px); color: var(--paper); }
 .gl-pin { position: relative; padding-block: clamp(80px, 10vw, 140px); }
 .gl-head { width: var(--content-width); margin: 0 auto 40px; }
 .gl-head p { max-width: 44ch; color: rgba(247,245,251,.75); margin: 22px 0 0; }
@@ -554,10 +556,16 @@ p { text-wrap: pretty; }
 .gl-ill figcaption { color: var(--sun); font-size: 26px; text-align: center; }
 .gl-count { display: none; }
 
-.motion .gl-pin { height: 100vh; height: 100svh; min-height: 600px; padding: 0; overflow: hidden; }
-.motion .gl-head { position: absolute; inset: 0; z-index: 3; width: auto; margin: 0; display: grid; place-content: center; justify-items: center; text-align: center; padding: var(--gut); pointer-events: none; }
+/* motion: um pin só. O trilho (.gl-hs) fica por cima do túnel: anda pro lado até as KengaZ e
+   depois sobe inteiro (texto do squad e a frase vêm embaixo dele). Quem recorta é o pin. */
+.motion .gl-pin { height: 100vh; height: 100svh; min-height: 600px; padding: 0; overflow: hidden; overflow: clip; }
+.motion .gl-hs { position: absolute; inset: 0; z-index: 3; }
+.motion .gl-hs-track { position: relative; display: grid; grid-auto-columns: 100%; grid-template-rows: var(--kz-h) auto var(--kz-h); will-change: transform; }
+.motion .gl-head { grid-row: 1; grid-column: 1; position: relative; width: auto; margin: 0; display: grid; place-content: center; justify-items: center; text-align: center; padding: var(--gut); pointer-events: none; }
 .motion .gl-head .h-xl { font-size: clamp(56px, 9vw, 150px); }
 .motion .gl-head p { text-align: center; }
+.motion .kz { grid-row: 1 / span 2; grid-column: 2; }
+.motion .gl-next { grid-row: 3; grid-column: 2; }
 .motion .gl-stage { position: absolute; inset: 0; perspective: 1000px; perspective-origin: 50% 46%; overflow: hidden; }
 .motion .gl-world { position: absolute; left: 50%; top: 48%; width: 0; height: 0; display: block; padding: 0; overflow: visible; transform-style: preserve-3d; will-change: transform; }
 .motion .gl-item { position: absolute; left: 0; top: 0; width: clamp(190px, 21vw, 360px); translate: -50% -50%; backface-visibility: hidden; visibility: hidden; opacity: 0; }
@@ -566,6 +574,119 @@ p { text-wrap: pretty; }
 .motion .gl-count { position: absolute; z-index: 4; left: 50%; bottom: 26px; translate: -50% 0; display: flex; align-items: baseline; gap: 10px; max-width: calc(100% - 2 * var(--gut)); padding: 9px 16px 8px; border: 2px solid var(--paper); border-radius: 999px; background: rgba(22,21,43,.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font: 400 20px/1 var(--pixel); color: var(--paper); white-space: nowrap; }
 .gl-count b { font-weight: 400; color: var(--sun); font-size: 26px; }
 .gl-count em { display: inline-block; max-width: 58vw; vertical-align: bottom; font-style: normal; color: var(--mint); overflow: hidden; text-overflow: ellipsis; }
+.motion .gl-count { opacity: 0; visibility: hidden; }
+
+/* ---------- KengaZ: capa de revista ----------
+   Paisagem: um palco 100u × 62u centrado na tela (1u = 1% da largura, ou menos se a altura
+   apertar), então a composição inteira escala junto. Os vídeos flutuam em volta do squad.
+   Retrato/celular: a capa vira coluna e os vídeos ganham um painel só deles. */
+.kz { --u: min(1vw, calc(var(--kz-h) / 62)); position: relative; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: var(--kz-h) auto; color: var(--paper); }
+.kz-cover { grid-area: 1 / 1; position: relative; }
+html:not(.motion) .kz-cover { overflow-x: clip; } /* com motion quem recorta é o pin */
+.kz-stage { position: absolute; left: 50%; top: 50%; width: calc(100 * var(--u)); height: calc(62 * var(--u)); translate: -50% -50%; }
+.kz-depth, .kz-lean, .kz-float, .kz-tilt { display: block; }
+.kz-glow {
+  position: absolute; left: calc(8 * var(--u)); top: calc(5 * var(--u)); width: calc(84 * var(--u)); height: calc(56 * var(--u)); pointer-events: none;
+  background:
+    radial-gradient(closest-side at 50% 60%, rgba(255,79,163,.26), rgba(255,79,163,0)),
+    radial-gradient(closest-side at 24% 64%, rgba(122,67,224,.36), rgba(122,67,224,0)),
+    radial-gradient(closest-side at 80% 58%, rgba(95,216,204,.18), rgba(95,216,204,0));
+}
+.kz-eyebrow { position: absolute; left: 0; right: 0; top: calc(4.4 * var(--u)); justify-content: center; margin: 0; }
+
+/* palavra gigante atrás do squad (a leitura de tela recebe "as KengaZ" simples) */
+.kz-title { position: absolute; z-index: 1; left: 0; right: 0; top: calc(6.8 * var(--u)); margin: 0; text-align: center; font: 400 calc(25 * var(--u))/.8 var(--display); letter-spacing: -.012em; }
+.kz-title .kz-depth, .kz-title .kz-lean { display: inline-block; }
+.kz-title .kz-lean { position: relative; }
+/* a caixa da palavra cobre a perna do g (senão a máscara de fade corta e o g vira q) */
+.kz-word { position: relative; display: inline-flex; padding-block: .12em .26em; margin-block: -.12em -.26em; -webkit-mask-image: linear-gradient(180deg, #000 48%, rgba(0,0,0,.3) 92%); mask-image: linear-gradient(180deg, #000 48%, rgba(0,0,0,.3) 92%); }
+.kz-mask { display: block; overflow: hidden; overflow: clip; padding: .1em .016em .22em; margin: -.1em -.016em -.22em; }
+.kz-l { display: block; color: var(--paper); }
+.kz-z { color: var(--pink); }
+.kz-kicker { position: absolute; z-index: 2; left: 0; top: 0; font-size: .15em; margin: -.42em 0 0 -1.05em; }
+.kz-kicker-in { display: inline-block; rotate: -10deg; padding: .14em .42em .2em; line-height: 1; color: var(--ink); background: var(--sun); border: max(2.5px, .07em) solid var(--ink); border-radius: 999px; box-shadow: .08em .08em 0 var(--ink); }
+
+/* o squad, na frente da palavra (recorte com a base dissolvendo no fundo) */
+.kz-squad { position: absolute; z-index: 2; left: calc(16 * var(--u)); top: calc(15 * var(--u)); width: calc(68 * var(--u)); pointer-events: none; }
+.kz-squad-in { position: relative; margin: 0; }
+.kz-squad-in img { width: 100%; height: auto; aspect-ratio: 1440 / 961; user-select: none; -webkit-user-drag: none; }
+.kz-tag { position: absolute; left: 24%; top: 1%; display: block; }
+.kz-tag-in { rotate: 5deg; font-size: clamp(12px, calc(1.05 * var(--u)), 16px); }
+.kz-tag-arrow { position: absolute; left: -44px; top: 64%; width: 50px; height: 44px; overflow: visible; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.kz-tag-arrow-out { stroke: var(--ink); stroke-width: 7.5; }
+.kz-tag-arrow-in { stroke: var(--sun); stroke-width: 3.5; }
+.kz-credit { position: absolute; left: 0; right: 0; bottom: 5%; text-align: center; font: 400 clamp(16px, calc(1.3 * var(--u)), 20px)/1 var(--pixel); color: rgba(247,245,251,.5); }
+
+/* vídeos: janelas .exe flutuando em volta do squad */
+.kz-vids { grid-area: 1 / 1; position: relative; z-index: 3; pointer-events: none; }
+.kz-vids-head { display: none; }
+.kz-cards { list-style: none; margin: 0; padding: 0; position: absolute; left: 50%; top: 50%; width: calc(100 * var(--u)); height: calc(62 * var(--u)); translate: -50% -50%; }
+.kz-card { position: absolute; width: calc(19 * var(--u)); pointer-events: auto; }
+.kz-card--a { left: calc(2.5 * var(--u)); top: calc(27 * var(--u)); width: calc(20.5 * var(--u)); --tilt: -5deg; }
+.kz-card--b { right: calc(2.5 * var(--u)); top: calc(16.5 * var(--u)); width: calc(18.5 * var(--u)); --tilt: 4deg; }
+.kz-card--c { right: calc(7.5 * var(--u)); top: calc(38 * var(--u)); width: calc(17.5 * var(--u)); --tilt: -2.5deg; }
+.kz-card:hover, .kz-card:focus-within { z-index: 2; }
+.kz-tilt { rotate: var(--tilt, 0deg); transition: rotate .6s var(--ease-out); }
+.kz-card:hover .kz-tilt, .kz-card:focus-within .kz-tilt { rotate: 0deg; }
+.kz-card-link { --sh: 8px; border-radius: 18px; color: var(--ink); text-decoration: none; box-shadow: var(--sh) var(--sh) 0 var(--pink); transition: translate .35s var(--ease-out), box-shadow .35s var(--ease-out); -webkit-user-drag: none; }
+.kz-card-link:hover { translate: -3px -3px; --sh: 11px; }
+.kz-card-link:active { translate: 2px 2px; --sh: 4px; transition-duration: .08s; }
+.kz-card-link .win-bar { font-size: clamp(17px, calc(1.3 * var(--u)), 21px); padding: 6px 12px 5px; }
+.kz-card-link .win-bar > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kz-card-body { display: flex; flex-direction: column; }
+.kz-thumb { position: relative; display: block; aspect-ratio: 16 / 9; overflow: hidden; border-bottom: var(--bw) solid var(--ink); background: var(--ink-2); }
+.kz-thumb img { width: 100%; height: 100%; object-fit: cover; transition: scale .8s var(--ease-out); }
+.kz-card-link:hover .kz-thumb img { scale: 1.06; }
+.kz-thumb .play { left: 10px; bottom: 10px; width: 40px; height: 40px; font-size: 13px; }
+.kz-new { position: absolute; right: 8px; top: 8px; rotate: 6deg; padding: 5px 10px 6px; font: 400 13px/1 var(--display); letter-spacing: .02em; color: #fff; background: var(--pink); border: 2px solid var(--ink); border-radius: 999px; box-shadow: 2px 2px 0 var(--ink); }
+.kz-card-txt { display: flex; flex-direction: column; gap: 6px; padding: 11px 14px 13px; }
+.kz-card-t { font: 700 clamp(13px, calc(1.04 * var(--u)), 15.5px)/1.3 var(--body); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.kz-card-txt time { font: 400 18px/1 var(--pixel); color: var(--muted); }
+
+
+/* a frase que leva pro túnel */
+.gl-next { display: grid; place-items: center; padding: clamp(40px, 8vw, 96px) var(--gut); text-align: center; }
+.gl-next-t { margin: 0; font: 400 clamp(56px, 9vw, 150px)/.92 var(--display); letter-spacing: -.01em; color: var(--paper); text-wrap: balance; }
+.gl-next-t .w { display: inline-block; white-space: nowrap; }
+.gl-next-hl { position: relative; display: inline-block; color: var(--sun); }
+.gl-next-squig { position: absolute; left: -3%; bottom: -.17em; width: 106%; height: .24em; overflow: visible; fill: none; stroke: var(--pink); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+.gl-next-squig path { vector-effect: non-scaling-stroke; stroke-dasharray: 1 1; }
+.motion .gl-next { padding: var(--gut); }
+
+/* retrato e celular: capa em coluna; vídeos num painel próprio (com motion, ao lado) */
+@media (max-aspect-ratio: 5/6), (max-width: 640px) {
+  .kz { --word: min(25vw, calc(var(--kz-h) * .125)); grid-template-rows: var(--kz-h) auto auto; }
+  .kz-cover { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 76px 0 18px; }
+  .kz-stage { position: relative; left: auto; top: auto; translate: none; width: 100%; height: auto; display: flex; flex-direction: column; align-items: center; }
+  .kz-glow { left: -15%; top: 18%; width: 130%; height: 76%; }
+  .kz-eyebrow { position: static; margin: 0 0 12px; }
+  .kz-title { position: relative; top: auto; font-size: var(--word); }
+  /* 112vw: o que vaza pros lados cai na borda já transparente do recorte, sem cortar rosto */
+  .kz-squad { position: relative; left: auto; top: auto; flex: none; width: min(112vw, calc(var(--kz-h) * .72)); margin-top: calc(var(--word) * -.4); }
+  .kz-tag { left: 22%; top: 15%; }
+  .kz-tag-in { font-size: 12px; }
+  .kz-tag-arrow { left: -34px; width: 38px; height: 34px; }
+  .kz-credit { bottom: 4%; font-size: 15px; }
+  .kz-vids { grid-area: 2 / 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 64px var(--gut) 24px; pointer-events: auto; }
+  .kz-vids-head { display: block; width: 100%; max-width: 520px; margin-bottom: 18px; }
+  .kz-vids-head .eyebrow { margin-bottom: 10px; }
+  .kz-vids-head h4 { margin: 0; font: 400 clamp(30px, 8.6vw, 44px)/.95 var(--display); }
+  .kz-cards { position: static; translate: none; width: 100%; max-width: 520px; height: auto; display: flex; flex-direction: column; gap: 16px; }
+  .kz-card, .kz-card--a, .kz-card--b, .kz-card--c { position: relative; left: auto; right: auto; top: auto; width: auto; --tilt: 0deg; }
+  .kz-card-link { --sh: 5px; border-radius: 16px; }
+  .kz-card-link:hover { --sh: 7px; }
+  .kz-card-link .win-bar { font-size: 17px; padding: 5px 10px 4px; }
+  .kz-card-body { flex-direction: row; }
+  .kz-thumb { flex: none; width: 44%; border-bottom: 0; border-right: var(--bw) solid var(--ink); }
+  .kz-thumb .play { left: 6px; bottom: 6px; width: 30px; height: 30px; font-size: 10px; border-width: 2px; box-shadow: 2px 2px 0 var(--ink); }
+  .kz-new { right: 5px; top: 5px; padding: 3px 7px 4px; font-size: 11px; }
+  .kz-card-txt { justify-content: center; gap: 4px; padding: 8px 10px; min-width: 0; }
+  .kz-card-t { font-size: 13.5px; -webkit-line-clamp: 3; }
+  .kz-card-txt time { font-size: 16px; }
+  .motion .kz { grid-column: 2 / span 2; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: var(--kz-h) auto; }
+  .motion .kz-vids { grid-area: 1 / 2; padding-top: 76px; }
+  .motion .gl-next { grid-column: 3; }
+}
 
 /* =========================================================
    LOJINHA

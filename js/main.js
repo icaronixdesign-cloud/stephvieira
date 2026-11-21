@@ -169,8 +169,13 @@
   mobileNav.addEventListener('change', e => { if (!e.matches) closeMenu(); });
 
   /* ---------- âncoras ---------- */
+  // alvos que moram dentro de um pin (ex.: #kengaz, no meio da galeria): a posição de scroll
+  // certa não é o topo do elemento, então o bloco dele registra aqui uma função que a calcula
+  const anchorY = {};
   function scrollToSection(target, duration) {
-    if (lenis) lenis.scrollTo(target.id === 'top' ? 0 : target, { duration, force: introPending });
+    const pinned = anchorY['#' + target.id];
+    if (lenis) lenis.scrollTo(target.id === 'top' ? 0 : pinned ? pinned() : target, { duration, force: introPending });
+    else if (pinned) window.scrollTo({ top: pinned(), behavior: reduce ? 'auto' : 'smooth' });
     else target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
   }
 
@@ -792,16 +797,36 @@ void main() {
   gsap.from('.brands-t', { y: 40, opacity: 0, duration: 1, ease: 'expo.out', scrollTrigger: { trigger: '.brands', start: 'top 88%' } });
 
   /* =========================================================
-     GALERIA — túnel 3D
+     GALERIA — fora de casa → KengaZ (de lado) → "e não para por aí" → túnel 3D
+     Um pin só, dirigido por T.p (0..1, com scrub). Em px de scroll, as fases são:
+       pan    o trilho anda pro lado até a capa das KengaZ, 1:1 com a distância andada
+              (retrato/celular: passa pela capa, segura um pouco e segue pros vídeos)
+       hold   a capa fica parada pra ser vista e clicada
+       exit   o trilho sobe como um scroll comum: texto e botões do squad passam e a frase
+              chega no meio, letra por letra
+       rest   a frase segura no meio
+       tunnel a câmera atravessa a frase e as fotos vêm vindo
      ========================================================= */
   (() => {
+    const section = $('.gallery');
+    const pinEl = $('.gl-pin');
+    const hs = $('.gl-hs');
+    const track = $('.gl-hs-track');
+    const headEl = $('.gl-head');
+    const kz = $('.kz');
+    const cover = $('.kz-cover', kz);
+    const next = $('.gl-next');
+    const squig = $('.gl-next-squig path');
     const stage = $('.gl-stage');
     const world = $('.gl-world');
     const items = $$('.gl-item');
-    const head = $('.gl-head');
     const iEl = $('.gl-i');
     const capEl = $('.gl-cap');
+    const countEl = $('.gl-count');
+    const hudSec = $('.hud-sec');
     const N = items.length;
+    const stackMq = matchMedia('(max-aspect-ratio: 5/6), (max-width: 640px)');
+    const nextChars = split($('.gl-next-t'), 'chars').chars;
     const pat = [[-1, -0.2, -5], [0.95, 0.25, 4], [-0.35, 0.5, -2], [0.62, -0.5, 3], [-0.92, 0.42, 6], [0.82, -0.12, -4], [-0.58, -0.58, 2], [0.32, 0.56, -3], [-1, 0.06, 4], [1, -0.42, -5]];
     // brilhinhos espalhados no espaço
     const sparks = [];
@@ -868,11 +893,18 @@ void main() {
         const d = Math.abs(z - 160);
         if (d < best) { best = d; near = i; }
       });
-      sparks.forEach(s => setOpacity(s.el, fade(s._z + cam)));
+      // os brilhinhos do túnel ficam de fundo: mais fracos enquanto as KengaZ estão na tela
+      const kzOn = clamp(0, 1, ph.pan * 2.2 - 0.6) * (1 - clamp(0, 1, (ph.exit - 0.55) / 0.35));
+      const sparkK = 1 - kzOn * 0.7;
+      sparks.forEach(s => setOpacity(s.el, fade(s._z + cam) * sparkK));
+      // a frase faz o papel do antigo título: a câmera atravessa ela
       const hp = clamp(0, 1, (P.p * N) / 1.1);
-      head.style.opacity = (1 - hp).toFixed(3);
-      head.style.transform = `scale(${(1 + hp * 1.6).toFixed(3)})`;
-      head.style.visibility = hp >= 1 ? 'hidden' : 'visible';
+      next.style.opacity = (1 - hp).toFixed(3);
+      next.style.transform = hp > 0 ? `scale(${(1 + hp * 1.6).toFixed(3)})` : '';
+      next.style.visibility = hp >= 1 ? 'hidden' : 'visible';
+      // o contador só aparece com as fotos
+      countEl.style.opacity = gate.toFixed(3);
+      countEl.style.visibility = gate < 0.01 ? 'hidden' : 'visible';
       if (near !== current) {
         current = near;
         iEl.textContent = String(near + 1).padStart(2, '0');
@@ -880,25 +912,210 @@ void main() {
       }
     }
 
+    /* ---------- KengaZ: montagem no lateral, profundidade na subida ---------- */
+    const coverDepth = $$('[data-depth]', cover);
+    const cardDepth = $$('.kz-cards [data-depth]', kz);
+    const cardLis = $$('.kz-card', kz);
+    const letters = $$('.kz-l', kz);
+    const kicker = $('.kz-kicker', kz);
+    const glow = $('.kz-glow', kz);
+    const eyebrow = $('.kz-eyebrow', kz);
+    const squadIn = $('.kz-squad-in', kz);
+    const tag = $('.kz-tag', kz);
+    const credit = $('.kz-credit', kz);
+    const vidsHead = $('.kz-vids-head', kz);
+    const depthOf = el => parseFloat(el.dataset.depth) || 0;
+    let stack = stackMq.matches;
+    let K = null;
+
+    function buildPan() {
+      const W = () => hs.clientWidth;
+      const tl = gsap.timeline({ paused: true, defaults: { ease: 'none' } });
+      tl.fromTo(track, { x: 0 }, { x: () => -(kz.offsetLeft + kz.offsetWidth - hs.clientWidth), duration: 1 }, 0);
+      // o título sai mais devagar que o trilho e apaga antes da capa chegar no meio
+      const headOut = stack ? 0.36 : 0.72;
+      tl.fromTo(headEl, { x: 0 }, { x: () => W() * 0.3, duration: headOut, ease: 'power1.in' }, 0)
+        .fromTo(headEl, { opacity: 1 }, { opacity: 0, duration: headOut * 0.8, ease: 'power1.in' }, headOut * 0.2);
+      // a capa se monta enquanto chega (paisagem: até o fim; retrato: na primeira metade)
+      const a0 = stack ? 0.06 : 0.24;
+      const a1 = stack ? 0.5 : 1;
+      const at = f => a0 + (a1 - a0) * f;
+      const span = f => (a1 - a0) * f;
+      // camadas em velocidades diferentes: a palavra atrasa, os vídeos adiantam
+      (stack ? coverDepth : [...coverDepth, ...cardDepth]).forEach(el => {
+        const d = depthOf(el);
+        tl.fromTo(el, { x: () => d * W() * 0.14 }, { x: 0, duration: a1, ease: 'power2.out' }, 0);
+      });
+      tl.fromTo(glow, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: span(0.6), ease: 'power2.out' }, at(0))
+        .fromTo(eyebrow, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: span(0.3), ease: 'power2.out' }, at(0.04))
+        // 140%: a máscara tem folga embaixo pra perna do g, então 112% ainda deixava o topo do K aparecer
+        .fromTo(letters, { yPercent: 140, rotation: 9 }, { yPercent: 0, rotation: 0, duration: span(0.4), stagger: span(0.07), ease: 'power3.out' }, at(0.06))
+        .fromTo(kicker, { scale: 0, rotation: -40 }, { scale: 1, rotation: 0, duration: span(0.25), ease: 'back.out(2.2)' }, at(0.5))
+        .fromTo(squadIn, { opacity: 0, yPercent: 14, scale: 0.92 }, { opacity: 1, yPercent: 0, scale: 1, duration: span(0.55), ease: 'power3.out' }, at(0.18))
+        .fromTo(tag, { scale: 0, rotation: -25 }, { scale: 1, rotation: 0, duration: span(0.22), ease: 'back.out(2.4)' }, at(0.74))
+        .fromTo(credit, { opacity: 0 }, { opacity: 1, duration: span(0.2) }, at(0.7));
+      if (!stack) {
+        // os vídeos saem de trás do squad girando e param nos seus lugares
+        cardLis.forEach((li, i) => tl.fromTo(li,
+          { opacity: 0, y: () => innerHeight * (0.1 + i * 0.04), rotation: 10 + i * 4, scale: 0.85 },
+          { opacity: 1, y: 0, rotation: 0, scale: 1, duration: span(0.4), ease: 'power3.out' }, at(0.36 + i * 0.1)));
+      } else {
+        // painel dos vídeos: chega na segunda metade, um cartão atrás do outro
+        tl.fromTo(vidsHead, { opacity: 0, x: () => W() * 0.12 }, { opacity: 1, x: 0, duration: 0.3, ease: 'power2.out' }, 0.6);
+        cardLis.forEach((li, i) => tl.fromTo(li,
+          { opacity: 0, x: () => W() * (0.3 + i * 0.12), rotation: 6 + i * 2 },
+          { opacity: 1, x: 0, rotation: 0, duration: 0.3, ease: 'power3.out' }, 0.58 + i * 0.05));
+      }
+      return tl;
+    }
+
+    function buildExit() {
+      const H = hs.clientHeight;
+      const D = Math.max(1, track.offsetHeight - H); // a tela da frase
+      const info = D - H;
+      const tl = gsap.timeline({ paused: true, defaults: { ease: 'none' } });
+      tl.fromTo(hs, { y: 0 }, { y: -D, duration: D }, 0);
+      // a capa sobe com profundidade: vídeos passam na frente, a palavra fica pra trás
+      (stack ? cardDepth : [...coverDepth, ...cardDepth]).forEach(el => {
+        tl.fromTo(el, { y: 0 }, { y: -depthOf(el) * H * 0.2, duration: H, ease: 'power1.in' }, 0);
+      });
+      // a frase nasce letra por letra enquanto a tela dela chega no meio; o rabisco fecha
+      tl.fromTo(nextChars, { yPercent: 120, rotation: i => ((i * 37) % 30) - 15, opacity: 0 },
+        { yPercent: 0, rotation: 0, opacity: 1, duration: H * 0.34, stagger: H * 0.024, ease: 'back.out(1.7)' }, info + H * 0.12);
+      tl.fromTo(squig, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: H * 0.24, ease: 'power2.inOut' }, D - H * 0.26);
+      return tl;
+    }
+
+    function build() {
+      // desfaz na ordem inversa (o exit gravou o estado que o pan deixou)
+      if (K) { K.exit.revert(); K.pan.revert(); }
+      stack = stackMq.matches;
+      K = { pan: buildPan(), exit: buildExit() };
+    }
+
+    /* ---------- fases em px de scroll ---------- */
+    const L = { mid: 0, pan: 1, hold: 0, exit: 1, rest: 0, tunnel: 1, total: 1 };
+    const far = () => Math.max(0, kz.offsetLeft + kz.offsetWidth - hs.clientWidth);
+    function lengths() {
+      const H = hs.clientHeight;
+      L.mid = stack ? Math.round(H * 0.4) : 0; // retrato: segura na capa antes dos vídeos
+      L.pan = far() + L.mid;
+      L.hold = Math.round(H * 0.45);
+      L.exit = Math.max(1, track.offsetHeight - H);
+      L.rest = Math.round(H * 0.3);
+      L.tunnel = Math.round(N * (touchInput ? H * 0.27 : innerHeight * 0.34));
+      L.total = L.pan + L.hold + L.exit + L.rest + L.tunnel;
+    }
+    function panP(v) {
+      const f = L.pan - L.mid;
+      if (f <= 0) return 1;
+      if (!stack) return clamp(0, 1, v / f);
+      const half = f / 2;
+      if (v <= half) return (v / half) * 0.5;
+      if (v <= half + L.mid) return 0.5;
+      return clamp(0, 1, 0.5 + ((v - half - L.mid) / half) * 0.5);
+    }
+
+    const T = { p: 0 };
+    const ph = { pan: 0, exit: 0 };
+    const bobs = $$('.kz-float', kz).map((el, i) => gsap.to(el, { y: -9, duration: 2.3 + i * 0.5, delay: i * 0.35, ease: 'sine.inOut', yoyo: true, repeat: -1, paused: true }));
+    let bobOn = false;
+    const setBob = on => {
+      if (on === bobOn) return;
+      bobOn = on;
+      bobs.forEach(b => { b.paused(!on); if (!on && stack) b.totalProgress(0); });
+    };
+    let st = null;
+    function apply() {
+      if (!K) return;
+      const v = T.p * L.total;
+      ph.pan = panP(v);
+      ph.exit = clamp(0, 1, (v - L.pan - L.hold) / L.exit);
+      K.pan.progress(ph.pan);
+      K.exit.progress(ph.exit);
+      P.p = clamp(0, 1, (v - L.pan - L.hold - L.exit - L.rest) / L.tunnel);
+      render();
+      setBob(!stack && ph.pan > 0.4 && ph.exit < 0.6);
+      if (hudSec && st && st.isActive) hudSec.textContent = ph.pan > 0.5 && ph.exit < 0.55 ? '08 · kengaz' : '08 · galeria';
+    }
+
+    build();
+    lengths();
     layout();
-    gsap.to(P, {
+    const tw = gsap.fromTo(T, { p: 0 }, {
       p: 1,
       ease: 'none',
-      onUpdate: render,
+      onUpdate: apply,
       scrollTrigger: {
-        ...scrollScene(stage.parentElement, () => '+=' + Math.round(N * innerHeight * 0.34), 1, height => N * height * 0.27),
+        // desktop: pin com scrub; toque: palco sticky na rolagem nativa (scrollScene)
+        ...scrollScene(pinEl, () => { build(); lengths(); return '+=' + L.total; }, 1, () => { build(); lengths(); return L.total; }),
         invalidateOnRefresh: true,
-        onRefresh: layout
+        onRefresh: () => { layout(); apply(); }
       }
     });
-    // leve inclinação da câmera com o ponteiro
+    st = tw.scrollTrigger;
+    apply();
+
+    /* ---------- onde o scroll para pra mostrar um pedaço das KengaZ ---------- */
+    const scrollFor = target => {
+      let v = L.pan + L.hold * 0.5; // capa montada, parada
+      if (target && stack && cover.contains(target)) v = (L.pan - L.mid) / 2 + L.mid / 2;
+      return st.start + v;
+    };
+    anchorY['#kengaz'] = () => scrollFor(null);
+    // teclado: o foco num link fora da tela leva o scroll até ele (o pin não rola sozinho)
+    kz.addEventListener('focusin', e => {
+      pinEl.scrollLeft = 0;
+      pinEl.scrollTop = 0;
+      if (!lenis) return;
+      const y = scrollFor(e.target);
+      if (Math.abs(lenis.scroll - y) < 2) return;
+      lenis.scrollTo(y, { immediate: true, force: true });
+      ScrollTrigger.update();
+      const sc = st.getTween && st.getTween();
+      if (sc) sc.progress(1);
+    });
+
+    // as imagens das KengaZ ficam fora da tela (de lado) até o trilho andar: carrega antes
+    const warm = new IntersectionObserver(es => {
+      if (!es.some(e => e.isIntersecting)) return;
+      warm.disconnect();
+      $$('img', kz).forEach(im => { im.loading = 'eager'; if (im.decode) im.decode().catch(() => {}); });
+    }, { rootMargin: '150% 0px' });
+    warm.observe(section);
+
+    // inclinação pela velocidade enquanto o trilho anda (como nos quadros)
+    const skews = [$('.h-xl', headEl), $('.kz-title .kz-lean', kz), ...$$('.kz-cards .kz-lean', kz)]
+      .filter(Boolean).map(el => gsap.quickTo(el, 'skewX', { duration: 0.6, ease: 'power3' }));
+    let lastSkew = 0;
+    gsap.ticker.add(() => {
+      const moving = st.isActive && ph.pan > 0 && ph.pan < 1 && ph.pan !== 0.5;
+      const s = moving ? clamp(-4, 4, -vel() * 0.14) : 0;
+      if (Math.abs(s - lastSkew) < 0.01) return;
+      lastSkew = s;
+      skews.forEach(f => f(s));
+    });
+
     if (fine) {
+      // leve inclinação da câmera do túnel com o ponteiro
       const rx = gsap.quickTo(look, 'rx', { duration: 1.2, ease: 'power3', onUpdate: renderCamera });
       const ry = gsap.quickTo(look, 'ry', { duration: 1.2, ease: 'power3', onUpdate: renderCamera });
-      stage.parentElement.addEventListener('pointermove', e => {
+      pinEl.addEventListener('pointermove', e => {
         rx((e.clientX / innerWidth - 0.5) * 7);
         ry((e.clientY / innerHeight - 0.5) * -5);
       });
+      // capa das KengaZ: cada camada se inclina pro ponteiro conforme a profundidade
+      const leans = $$('.kz-lean', kz).map(el => {
+        const d = depthOf(el.closest('[data-depth]'));
+        const o = { duration: 1.3, ease: 'power3' };
+        return { d, x: gsap.quickTo(el, 'x', o), y: gsap.quickTo(el, 'y', o) };
+      });
+      const lean = (nx, ny) => leans.forEach(l => { l.x(nx * l.d * 24); l.y(ny * l.d * 14); });
+      kz.addEventListener('pointermove', e => {
+        if (e.pointerType !== 'mouse' || stack) return;
+        lean((e.clientX / innerWidth) * 2 - 1, (e.clientY / innerHeight) * 2 - 1);
+      });
+      kz.addEventListener('pointerleave', () => lean(0, 0));
     }
   })();
 
